@@ -1,0 +1,26 @@
+services:
+  bot: 
+    image: 'giftbottg:latest'
+    networks:
+      - telegram
+    restart: always
+    env_file:
+      - ./.env
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}"
+    depends_on:
+      - db
+  db:
+    image: 'postgres:18'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - telegram
+    restart: always
+    env_file:
+      - ./.env
+volumes: 
+  postgres-data:
+    external: false
+networks:
+  telegram:

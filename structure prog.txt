@@ -1,0 +1,44 @@
+Ñòğóêòóğà ïàïîê
+Ñåğèéíûé íîìåğ òîìà: B025-6510
+C:.
+¦   bot_main_v2.py
+¦   config_v2.py
+¦   database_v2.py
+¦   requirements_v2.txt
+¦   structure.txt
+¦   
++---handlers
+¦   ¦   __init__.py
+¦   ¦   
+¦   +---admin
+¦   ¦       admin_create_contest.py
+¦   ¦       admin_menu.py
+¦   ¦       admin_select_winner.py
+¦   ¦       __init__.py
+¦   ¦       
+¦   +---contests
+¦   ¦       voting_contest_v2.py
+¦   ¦       __init__.py
+¦   ¦       
+¦   +---faq
+¦   ¦       faq_contact_info.py
+¦   ¦       faq_contest_types.py
+¦   ¦       faq_menu.py
+¦   ¦       faq_referral_info.py
+¦   ¦       __init__.py
+¦   ¦       
+¦   +---system
+¦   ¦       system_auto_approve.py
+¦   ¦       __init__.py
+¦   ¦       
+¦   L---user
+¦           user_main_menu.py
+¦           user_my_stats.py
+¦           user_referral.py
+¦           __init__.py
+¦           
+L---utils
+        utils_filters_v2.py
+        utils_formatters_v2.py
+        __init__.py
+        
