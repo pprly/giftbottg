@@ -1,8 +1,35 @@
-# Environments
+# Переменные окружения
 .env
-.venv
-env/
+.env.local
+.env.production
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 venv/
+env/
 ENV/
-env.bak/
-venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite3
+
+# Docker
+*.log
+
+# Личные заметки
+notes.txt
+todo.md
