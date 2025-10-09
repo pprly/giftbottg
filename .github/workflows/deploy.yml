@@ -35,7 +35,7 @@ jobs:
         context: .
         file: Dockerfile
         push: true
-        tags: pprly/giftbottg:latest
+        tags: ghcr.io/pprly/giftbottg:latest
 
     - name: Deploy to server
       uses: appleboy/ssh-action@v1.0.3
