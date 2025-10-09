@@ -1,6 +1,9 @@
 services:
   bot: 
-    build: 'giftbottg:latest'
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: 'giftbottg:latest'
     networks:
       - telegram
     restart: always
