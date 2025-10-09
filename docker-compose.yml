@@ -1,6 +1,6 @@
 services:
   bot: 
-    image: 'giftbottg:latest'
+    build: 'giftbottg:latest'
     networks:
       - telegram
     restart: always
