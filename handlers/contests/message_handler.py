@@ -106,7 +106,7 @@ async def handle_participant_registration(message: Message, contest: dict):
     
     # Запрещаем участие победителям предыдущего конкурса этого типа
     print(f"      🔍 Проверяю победителей прошлых конкурсов...")
-    last_winners = await db.get_last_winners_by_type(contest['contest_type'])
+    last_winners = await db.get_last_winners_by_type(contest['contest_type'], limit=1)
     print(f"      Победители прошлых конкурсов: {last_winners}")
     
     if last_winners and message.from_user.id in last_winners:

@@ -49,7 +49,7 @@ def format_participant_list(participants: list, include_blockquote: bool = True)
     text = "\n".join(lines)
     
     if include_blockquote:
-        return f"<blockquote>\n{text}\n</blockquote>"
+        return f"<blockquote>{text}</blockquote>"
     else:
         return text
 

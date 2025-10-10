@@ -786,7 +786,7 @@ async def force_start_contest(callback: CallbackQuery):
         "✅ **КОНКУРС ЗАПУЩЕН ПРИНУДИТЕЛЬНО**\n\n"
         f"🆔 ID: {contest_id}\n"
         f"🎁 Приз: {contest['prize']}\n"
-        f"👥 Участников: {participants_count}/{contest['participants_count']}\n\n"
+        f"👥 Участников: {participants_count}/{contest['participants_count']}\n"
         "Список участников опубликован в канале.\n"
         "Таймер запущен!"
     )

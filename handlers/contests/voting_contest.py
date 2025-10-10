@@ -188,17 +188,19 @@ async def publish_participants_list(bot: Bot, contest_id: int):
             print(f"⚠️ [{contest_id}] Не удалось удалить анонс: {e}")
     
     # Публикуем новое сообщение со списком
-    text = f"🎁 Приз: {contest['prize']}\n\n"
-    text += "👥 Список участников:"
+    text = f"🎁 Приз: {contest['prize']}\n"
+    text += "\n👥 Список участников:"
     text += format_participant_list(participants, include_blockquote=True)
-    text += f"\n⏰ Осталось {contest['timer_minutes']} минут\n"
-    text += f'\n💡 Голосуем Реакциями в <a href="{config.CHANNEL_INVITE_LINK}">Зазвездился</a>'
-    
+    text += f"\n\n⏰ Осталось {contest['timer_minutes']} минут"
+    text += f'\n\n💡 Голосуем Реакциями в <a href="{config.CHANNEL_INVITE_LINK}">Зазвездился</a>'
+    text += f'\n📱<a href="{config.BOT_INVITE_LINK}"> Открыть Бота</a>'
+
     try:
         message = await bot.send_message(
             chat_id=config.CHANNEL_ID,
             text=text,
-            parse_mode="HTML"
+            parse_mode="HTML",
+            disable_web_page_preview=True
         )
         
         # Обновляем ID сообщения в БД (теперь это список участников)
@@ -230,25 +232,27 @@ async def start_timer(bot: Bot, contest_id: int, minutes: int):
             # Формируем текст в зависимости от оставшегося времени
             if remaining > 0:
                 # Ещё есть время
-                text = f"🎁 Приз: {contest['prize']}\n\n"
-                text += "👥 Список участников:"
+                text = f"🎁 Приз: {contest['prize']}\n"
+                text += "\n👥 Список участников:"
                 text += format_participant_list(participants, include_blockquote=True)
-                text += f"\n⏰ Осталось {format_time_left(remaining)}\n"
-                text += f'\n💡 Голосуем Реакциями в <a href="{config.CHANNEL_INVITE_LINK}">Зазвездился</a>'
+                text += f"\n\n⏰ Осталось {format_time_left(remaining)}"
+                text += f'\n\n💡 Голосуем Реакциями в <a href="{config.CHANNEL_INVITE_LINK}">Зазвездился</a>'
+                text += f'\n📱<a href="{config.BOT_INVITE_LINK}"> Открыть Бота</a>'
             else:
                 # Время вышло (remaining = 0)
-                text = f"🎁 Приз: {contest['prize']}\n\n"
-                text += "👥 Список участников:\n"
+                text = f"🎁 Приз: {contest['prize']}\n"
+                text += "\n👥 Список участников:"
                 text += format_participant_list(participants, include_blockquote=True)
-                text += "\n⏳ Время вышло, ждём результатов!\n"
-                text += f'\n💡 Голосуем Реакциями в <a href="{config.CHANNEL_INVITE_LINK}">Зазвездился</a>'
-            
+                text += "\n\n⏳ Время вышло, ждём результатов!"
+                text += f'\n\n💡 Голосуем Реакциями в <a href="{config.CHANNEL_INVITE_LINK}">Зазвездился</a>'
+                text += f'\n📱<a href="{config.BOT_INVITE_LINK}"> Открыть Бота</a>'
             try:
                 await bot.edit_message_text(
                     chat_id=config.CHANNEL_ID,
                     message_id=message_id,
                     text=text,
-                    parse_mode="HTML"
+                    parse_mode="HTML",
+                    disable_web_page_preview=True
                 )
                 
                 if remaining > 0:
@@ -296,9 +300,9 @@ async def end_contest(bot: Bot, contest_id: int):
         return
     
     # Формируем список участников для админа
-    text = f"🏁 **Конкурс #{contest_id} завершён!**\n\n"
-    text += f"🎁 Приз: {contest['prize']}\n\n"
-    text += "👥 **Участники:**\n\n"
+    text = f"🏁 **Конкурс #{contest_id} завершён!**\n"
+    text += f"🎁 Приз: {contest['prize']}\n"
+    text += "👥 **Участники:**\n"
     
     for p in participants:
         emoji = p['comment_text']
@@ -313,7 +317,8 @@ async def end_contest(bot: Bot, contest_id: int):
         await bot.send_message(
             chat_id=config.ADMIN_ID,
             text=text,
-            parse_mode="Markdown"
+            parse_mode="Markdown",
+            disable_web_page_preview=True
         )
         print(f"✅ [{contest_id}] Результаты отправлены админу")
     except Exception as e:

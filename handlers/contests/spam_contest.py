@@ -244,7 +244,7 @@ async def format_spam_leaderboard(contest: dict, participants: list, minutes_lef
     if len(leaderboard) > 10:
         text += f"...\n"
     
-    text += f"\n⏰ Осталось {minutes_left} мин\n"
+    text += f"\n\n⏰ Осталось {minutes_left} мин\n"
     text += f"💬 Пишите больше!\n\n"
     text += f"🔄 Обновление каждые 30 секунд"
     
