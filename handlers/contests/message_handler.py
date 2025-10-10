@@ -214,6 +214,11 @@ async def handle_discussion_message(message: Message):
     if message.from_user.id == config.BOT_ID:
         print("   ⏭️ Игнорирую сообщение от бота")
         return
+
+    # Игнорируем сообщения от других ботов
+    if message.from_user.is_bot:
+        print("   ⏭️ Игнорирую сообщение от другого бота")
+        return
     
     # Получаем все активные конкурсы
     contests = await db.get_active_contests()
