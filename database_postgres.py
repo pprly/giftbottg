@@ -505,8 +505,8 @@ class DatabasePostgres:
             
             return [dict(row) for row in rows]
     
-    async def get_user_position(self, user_id: int, leaderboard_type: str) -> int:
-        """Получить позицию в рейтинге"""
+    async def get_user_position(self, user_id: int, leaderboard_type: str) -> tuple[int, int]:
+        """Получить позицию в рейтинге и общее количество участников"""
         column_map = {
             'referrals': 'referral_points',
             'wins': 'total_wins',
@@ -516,15 +516,37 @@ class DatabasePostgres:
         column = column_map.get(leaderboard_type, 'total_wins')
         
         async with self.pool.acquire() as conn:
-            position = await conn.fetchval(f'''
-                SELECT COUNT(*) + 1
-                FROM user_stats
-                WHERE {column} > (
-                    SELECT {column} FROM user_stats WHERE user_id = $1
+            # Получаем позицию пользователя
+            position_row = await conn.fetchrow(f'''
+                WITH ranked AS (
+                    SELECT user_id, 
+                        ROW_NUMBER() OVER (ORDER BY {column} DESC) as position
+                    FROM user_stats
+                    WHERE {column} > 0
                 )
+                SELECT position FROM ranked WHERE user_id = $1
             ''', user_id)
             
-            return position or 0
+            # Получаем общее количество участников с ненулевым значением
+            total = await conn.fetchval(f'''
+                SELECT COUNT(*) FROM user_stats WHERE {column} > 0
+            ''')
+            
+            # Если пользователя нет в рейтинге - он на последнем месте
+            position = position_row['position'] if position_row else (total + 1 if total else 1)
+            
+            return (position, total)
+            
+            async with self.pool.acquire() as conn:
+                position = await conn.fetchval(f'''
+                    SELECT COUNT(*) + 1
+                    FROM user_stats
+                    WHERE {column} > (
+                        SELECT {column} FROM user_stats WHERE user_id = $1
+                    )
+                ''', user_id)
+                
+                return position or 0
     
     # ==================== ACHIEVEMENTS ====================
     
