@@ -581,15 +581,15 @@ class DatabasePostgres:
             ''', contest_id, user_id)
     
     async def get_spam_leaderboard(self, contest_id: int) -> List[Dict]:
-    """Получить таблицу лидеров спам-конкурса"""
-    async with self.pool.acquire() as conn:
-        rows = await conn.fetch('''
-            SELECT s.*, p.username, p.full_name, p.comment_text
-            FROM spam_messages s
-            JOIN participants p ON s.contest_id = p.contest_id AND s.user_id = p.user_id
-            WHERE s.contest_id = $1
-            ORDER BY s.spam_count DESC
-        ''', contest_id)
+        """Получить таблицу лидеров спам-конкурса"""
+        async with self.pool.acquire() as conn:
+            rows = await conn.fetch('''
+                SELECT s.*, p.username, p.full_name, p.comment_text
+                FROM spam_messages s
+                JOIN participants p ON s.contest_id = p.contest_id AND s.user_id = p.user_id
+                WHERE s.contest_id = $1
+                ORDER BY s.spam_count DESC
+            ''', contest_id)
         
         return [dict(row) for row in rows]
     
@@ -603,16 +603,16 @@ class DatabasePostgres:
             return count or 0
     
     async def get_spam_winner(self, contest_id: int) -> Optional[Dict]:
-    """Получить победителя спам-конкурса"""
-    async with self.pool.acquire() as conn:
-        row = await conn.fetchrow('''
-            SELECT s.*, p.username, p.full_name, p.comment_text
-            FROM spam_messages s
-            JOIN participants p ON s.contest_id = p.contest_id AND s.user_id = p.user_id
-            WHERE s.contest_id = $1 AND s.spam_count > 0
-            ORDER BY s.spam_count DESC
-            LIMIT 1
-        ''', contest_id)
+        """Получить победителя спам-конкурса"""
+        async with self.pool.acquire() as conn:
+            row = await conn.fetchrow('''
+                SELECT s.*, p.username, p.full_name, p.comment_text
+                FROM spam_messages s
+                JOIN participants p ON s.contest_id = p.contest_id AND s.user_id = p.user_id
+                WHERE s.contest_id = $1 AND s.spam_count > 0
+                ORDER BY s.spam_count DESC
+                LIMIT 1
+            ''', contest_id)
         
         return dict(row) if row else None
 
