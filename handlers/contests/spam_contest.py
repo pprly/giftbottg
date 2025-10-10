@@ -188,6 +188,32 @@ async def start_spam_contest(bot: Bot, contest_id: int):
         except Exception as e:
             print(f"⚠️ [{contest_id}] Не удалось удалить анонс: {e}")
     
+    # Получаем длительность конкурса из entry_conditions
+    entry_conditions = contest.get('entry_conditions', {})
+    contest_duration = entry_conditions.get('contest_duration', 10)
+    
+    # Публикуем live-таблицу
+    try:
+        leaderboard_text = await format_spam_leaderboard(contest, participants, contest_duration)
+        
+        message = await bot.send_message(
+            chat_id=config.CHANNEL_ID,
+            text=leaderboard_text,
+            parse_mode="Markdown"
+        )
+        
+        await db.set_announcement_message(contest_id, message.message_id)
+        print(f"✅ [{contest_id}] Live-таблица опубликована")
+        
+        # Запускаем таймер конкурса с обновлениями
+        task = asyncio.create_task(run_spam_timer(bot, contest_id, contest_duration))
+        active_tasks[f"spam_timer_{contest_id}"] = task
+        
+    except Exception as e:
+        print(f"❌ [{contest_id}] Ошибка публикации таблицы: {e}")
+        import traceback
+        traceback.print_exc()
+    
     # Публикуем live-таблицу
     leaderboard_text = await format_spam_leaderboard(contest, participants, contest['timer_minutes'])
     
@@ -214,7 +240,13 @@ async def format_spam_leaderboard(contest: dict, participants: list, minutes_lef
     contest_id = contest['id']
     
     # Получаем актуальную таблицу лидеров
-    leaderboard = await db.get_spam_leaderboard(contest_id)
+    try:
+        leaderboard = await db.get_spam_leaderboard(contest_id)
+    except Exception as e:
+        print(f"❌ [{contest_id}] Ошибка получения лидерборда: {e}")
+        import traceback
+        traceback.print_exc()
+        leaderboard = []
     
     text = (
         f"⚡ **СПАМ-КОНКУРС ИДЁТ!**\n\n"
@@ -222,29 +254,52 @@ async def format_spam_leaderboard(contest: dict, participants: list, minutes_lef
         f"🏆 **ТАБЛИЦА ЛИДЕРОВ:**\n\n"
     )
     
-    # Показываем топ-10 (или всех если меньше)
-    for idx, leader in enumerate(leaderboard[:10], 1):
-        emoji = leader.get('comment_text', '❓')
-        username = f"@{leader['username']}" if leader['username'] != "noname" else leader['full_name']
-        count = leader['spam_count']
+    if not leaderboard:
+        text += "Нет данных\n\n"
+    else:
+        # Показываем топ-10 (или всех если меньше)
+        for idx, leader in enumerate(leaderboard[:10], 1):
+            try:
+                # Безопасное получение данных
+                emoji = leader.get('comment_text', '❓')
+                username = leader.get('username')
+                full_name = leader.get('full_name', 'Unknown')
+                count = leader.get('spam_count', 0)
+                
+                # Формируем отображаемое имя
+                if username and username != "noname":
+                    display_name = f"@{username}"
+                else:
+                    display_name = full_name
+                
+                # Склонение для каждого
+                if count % 10 == 1 and count % 100 != 11:
+                    word = "спам"
+                elif count % 10 in [2, 3, 4] and count % 100 not in [12, 13, 14]:
+                    word = "спама"
+                else:
+                    word = "спамов"
+                
+                # Эмодзи для топ-3
+                if idx == 1 and count > 0:
+                    medal = "🔥🔥🔥"
+                elif idx == 2 and count > 0:
+                    medal = "🔥🔥"
+                elif idx == 3 and count > 0:
+                    medal = "🔥"
+                else:
+                    medal = ""
+                
+                text += f"{idx} {emoji} {display_name} — {count} {word} {medal}\n"
+            except Exception as e:
+                print(f"❌ Ошибка форматирования участника {idx}: {e}")
+                text += f"{idx} ❓ Unknown — 0\n"
         
-        # Эмодзи для топ-3
-        if idx == 1 and count > 0:
-            medal = "🔥🔥🔥"
-        elif idx == 2 and count > 0:
-            medal = "🔥🔥"
-        elif idx == 3 and count > 0:
-            medal = "🔥"
-        else:
-            medal = ""
-        
-        text += f"{idx} {emoji} {username} — {count} {medal}\n"
+        # Если участников больше 10, показываем троеточие
+        if len(leaderboard) > 10:
+            text += f"...\n"
     
-    # Если участников больше 10, показываем троеточие
-    if len(leaderboard) > 10:
-        text += f"...\n"
-    
-    text += f"\n\n⏰ Осталось {minutes_left} мин\n"
+    text += f"\n⏰ Осталось {minutes_left} мин\n"
     text += f"💬 Пишите больше!\n\n"
     text += f"🔄 Обновление каждые 30 секунд"
     
