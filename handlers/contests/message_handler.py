@@ -62,25 +62,25 @@ async def handle_participant_registration(message: Message, contest: dict):
     except Exception as e:
         # print(f"      ⚠️ Ошибка проверки даты: {e}")
         # Продолжаем работу даже если есть проблемы с датой
-    
-    # print(f"      💬 Комментарий: {message.text[:50] if message.text else 'нет текста'}...")
-    
-    # Проверяем подписку на канал
-    # print(f"      🔍 Проверяю подписку на канал...")
-    is_subscribed = await check_subscription(message.bot, message.from_user.id)
-    # print(f"      {'✅' if is_subscribed else '❌'} Подписка: {is_subscribed}")
-    
-    if not is_subscribed:
-        # print(f"      ⚠️ Пользователь @{message.from_user.username} не подписан")
-        try:
-            await message.reply(
-                f'⚠️ Вы не подписаны на канал!\n\n'
-                f'👉 <a href="{config.CHANNEL_INVITE_LINK}">Подпишитесь на канал</a> для участия в конкурсе.',
-                parse_mode="HTML"
-            )
-        except Exception as e:
-            # print(f"      ⚠️ Не удалось отправить предупреждение: {e}")
-        return
+        
+        # print(f"      💬 Комментарий: {message.text[:50] if message.text else 'нет текста'}...")
+        
+        # Проверяем подписку на канал
+        # print(f"      🔍 Проверяю подписку на канал...")
+        is_subscribed = await check_subscription(message.bot, message.from_user.id)
+        # print(f"      {'✅' if is_subscribed else '❌'} Подписка: {is_subscribed}")
+        
+        if not is_subscribed:
+            # print(f"      ⚠️ Пользователь @{message.from_user.username} не подписан")
+            try:
+                await message.reply(
+                    f'⚠️ Вы не подписаны на канал!\n\n'
+                    f'👉 <a href="{config.CHANNEL_INVITE_LINK}">Подпишитесь на канал</a> для участия в конкурсе.',
+                    parse_mode="HTML"
+                )
+            except Exception as e:
+                # print(f"      ⚠️ Не удалось отправить предупреждение: {e}")
+            return
     
     # Проверяем условия участия (entry_conditions)
     # print(f"      🔍 Проверяю условия участия...")
@@ -121,9 +121,9 @@ async def handle_participant_registration(message: Message, contest: dict):
         return
     
     # Получаем уже использованные эмодзи
-    print(f"      🔍 Получаю список участников...")
+    # print(f"      🔍 Получаю список участников...")
     existing_participants = await db.get_participants(contest['id'])
-    print(f"      Текущих участников: {len(existing_participants)}")
+    # print(f"      Текущих участников: {len(existing_participants)}")
     
     used_emojis = [p['comment_text'] for p in existing_participants]
     
@@ -153,10 +153,10 @@ async def handle_participant_registration(message: Message, contest: dict):
         
         if added:
             count = await db.get_participants_count(contest['id'])
-            print(f"      ✅ Добавлен! Эмодзи: {random_emoji} Всего: {count}/{contest['participants_count']}")
+            print(f"      ✅ Добавлен!! Эмодзи: {random_emoji} Всего: {count}/{contest['participants_count']}")
             
             # Увеличиваем счётчик участий в статистике
-            print(f"      📊 Обновляю статистику...")
+            print(f"      📊 Обновляю статистику..")
             await db.increment_user_contests(message.from_user.id)
             
             # Проверяем достижения за участие
