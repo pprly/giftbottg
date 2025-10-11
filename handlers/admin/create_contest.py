@@ -629,7 +629,9 @@ async def process_contest_timer(callback: CallbackQuery, state: FSMContext):
         await state.update_data(waiting_contest_timer=True)
         await callback.answer()
         return
-    
+
+
+
     contest_timer = int(value)
     await finalize_contest(callback.message, state, contest_timer)
     await callback.answer()
