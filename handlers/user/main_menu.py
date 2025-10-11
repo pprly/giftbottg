@@ -4,7 +4,7 @@
 """
 
 from aiogram import Router, F
-from aiogram.filters import Command
+from aiogram.filters import Command, CommandObject
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 import config
@@ -40,19 +40,20 @@ def get_main_menu_keyboard(user_id: int):
 
 
 @router.message(Command("start"))
-async def cmd_start(message: Message):
+async def cmd_start(message: Message, command: CommandObject):
     """
     Команда /start - главное меню или реферальный флоу
     """
     user_id = message.from_user.id
     
-    # Проверяем есть ли параметр (реферальная ссылка)
-    args = message.text.split()
+    # Получаем аргументы команды правильно
+    args = command.args  # ← ИСПРАВЛЕНО: используем CommandObject
     
-    if len(args) > 1 and args[1].startswith("ref_"):
+    # Проверяем реферальную ссылку
+    if args and args.startswith("ref_"):
         # Это реферальный переход - обрабатываем в referral.py
         from handlers.user.referral import handle_referral_link
-        await handle_referral_link(message, args[1])
+        await handle_referral_link(message, args)
         return
     
     # Обычное главное меню
