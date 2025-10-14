@@ -35,42 +35,41 @@ async def handle_referral_link(message: Message, ref_code: str):
             await show_main_menu(message)
             return
         
-        # Проверяем был ли уже приглашён кем-то
-        existing_referrer = await db.check_referral_exists(referred_id)
-        if existing_referrer:
+        # Проверяем был ли уже приглашён этим реферером
+        already_referred = await db.check_referral_exists(referrer_id, referred_id)
+        
+        if already_referred:
             await message.answer(
-                "ℹ️ Вы уже зарегистрированы в системе!"
+                "ℹ️ Вы уже были приглашены этим пользователем!"
             )
             from handlers.user.main_menu import show_main_menu
             await show_main_menu(message)
             return
         
         # Добавляем реферала
-        added = await db.add_referral(referrer_id, referred_id)
+        await db.add_referral(referrer_id, referred_id)
         
-        if added:
-            # Получаем информацию о пригласившем
-            try:
-                referrer_info = await message.bot.get_chat(referrer_id)
-                referrer_name = referrer_info.first_name
-            except:
-                referrer_name = "пользователь"
-            
-            builder = InlineKeyboardBuilder()
-            builder.button(text="📢 Подписаться на канал", url=config.CHANNEL_INVITE_LINK)
-            builder.button(text="✅ Я подписался", callback_data=f"check_subscription_{referrer_id}")
-            builder.adjust(1)
-            
-            await message.answer(
-                config.MESSAGES["referral_welcome"].format(referrer_name=referrer_name),
-                reply_markup=builder.as_markup()
-            )
-        else:
-            from handlers.user.main_menu import show_main_menu
-            await show_main_menu(message)
+        # Получаем информацию о пригласившем
+        try:
+            referrer_info = await message.bot.get_chat(referrer_id)
+            referrer_name = referrer_info.first_name
+        except:
+            referrer_name = "пользователь"
+        
+        builder = InlineKeyboardBuilder()
+        builder.button(text="📢 Подписаться на канал", url=config.CHANNEL_INVITE_LINK)
+        builder.button(text="✅ Я подписался", callback_data=f"check_subscription_{referrer_id}")
+        builder.adjust(1)
+        
+        await message.answer(
+            config.MESSAGES["referral_welcome"].format(referrer_name=referrer_name),
+            reply_markup=builder.as_markup()
+        )
             
     except Exception as e:
         print(f"❌ Ошибка обработки реферальной ссылки: {e}")
+        import traceback
+        traceback.print_exc()
         await message.answer("⚠️ Неверная реферальная ссылка")
         from handlers.user.main_menu import show_main_menu
         await show_main_menu(message)

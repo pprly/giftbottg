@@ -548,7 +548,7 @@ class DatabasePostgres:
                 
                 return position or 0
     
-    # ==================== ACHIEVEMENTS ====================
+    # ==================== ACHIEVEMENTS ==================== #
     
     async def check_and_unlock_achievement(self, user_id: int, achievement_type: str, 
                                          achievement_level: str):

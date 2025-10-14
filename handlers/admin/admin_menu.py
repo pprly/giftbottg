@@ -314,3 +314,26 @@ async def confirm_cancel_contest(callback: CallbackQuery):
         parse_mode="Markdown"
     )
     await callback.answer()
+
+@router.message(Command("clear_referrals"))
+async def clear_referrals(message: Message):
+    """Очистить реферальную систему (только для админа)"""
+    if not is_admin(message.from_user.id):
+        return
+    
+    from database_postgres import db
+    
+    try:
+        async with db.pool.acquire() as conn:
+            # Очищаем рефералов
+            deleted = await conn.execute('DELETE FROM referrals')
+            
+            # Сбрасываем счетчики
+            await conn.execute('UPDATE user_stats SET referral_points = 0')
+            
+            # Удаляем достижения за рефералов
+            await conn.execute("DELETE FROM achievements WHERE achievement_type = 'referrals'")
+        
+        await message.answer("✅ Реферальная система очищена!")
+    except Exception as e:
+        await message.answer(f"❌ Ошибка: {e}")
