@@ -34,7 +34,7 @@ async def show_my_stats(callback: CallbackQuery):
         f"🎯 Участий в конкурсах: {stats['total_contests']}\n"
         f"🏆 Побед: {stats['total_wins']}\n\n"
         f"💡 <b>Пригласите друзей!</b>\n"
-        f"Нажмите кнопку ниже"
+        f"Нажмите кнопку ниже, выберите чат и отправьте приглашение!"
     )
     
     # Если есть победы по типам
@@ -53,14 +53,17 @@ async def show_my_stats(callback: CallbackQuery):
     
     builder = InlineKeyboardBuilder()
     
-    # Кликабельная ссылка с текстом
-    share_text = "🎉 Присоединяйся к конкурсам!"
-    share_message = f"{share_text}\n{referral_link}"
-    
+    # ✅ НОВАЯ КНОПКА - Inline Mode
     builder.button(
         text="📤 Пригласить друга", 
-        url=f"https://t.me/share/url?url={quote(referral_link)}&text={quote(share_text)}"
+        switch_inline_query="приглашение"  # Открывает список чатов
     )
+    
+    # Дополнительная кнопка - скопировать ссылку (для тех, кто хочет отправить вручную)
+    # builder.button(
+    #    text="🔗 Скопировать ссылку",
+    #    callback_data="copy_referral_link"
+    #)
     
     builder.button(text="🔙 Назад в меню", callback_data="back_to_menu")
     builder.adjust(1)
@@ -72,4 +75,19 @@ async def show_my_stats(callback: CallbackQuery):
     )
     await callback.answer()
 
+
+@router.callback_query(F.data == "copy_referral_link")
+async def copy_referral_link(callback: CallbackQuery):
+    """
+    Показать ссылку для копирования
+    """
+    user_id = callback.from_user.id
+    bot_username = (await callback.bot.get_me()).username
+    referral_link = f"https://t.me/{bot_username}?start=ref_{user_id}"
     
+    await callback.answer(
+        f"Ваша реферальная ссылка:\n{referral_link}\n\nСкопируйте и отправьте друзьям!",
+        show_alert=True
+    )
+
+
