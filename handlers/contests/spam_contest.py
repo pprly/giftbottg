@@ -9,6 +9,7 @@ import random
 from datetime import datetime
 from aiogram import Router, F, Bot
 from aiogram.types import Message
+from aiogram.utils.markdown import escape_md
 import config
 from database_postgres import db
 from utils.filters import ParticipantFilter
@@ -239,7 +240,6 @@ async def format_spam_leaderboard(contest: dict, participants: list, minutes_lef
     """Форматирование таблицы лидеров"""
     contest_id = contest['id']
     
-    # Получаем актуальную таблицу лидеров
     try:
         leaderboard = await db.get_spam_leaderboard(contest_id)
     except Exception as e:
@@ -250,29 +250,27 @@ async def format_spam_leaderboard(contest: dict, participants: list, minutes_lef
     
     text = (
         f"⚡ **СПАМ-КОНКУРС ИДЁТ!**\n\n"
-        f"🎁 Приз: {contest['prize']}\n\n"
+        f"🎁 Приз: {escape_md(contest['prize'])}\n\n"
         f"🏆 **ТАБЛИЦА ЛИДЕРОВ:**\n\n"
     )
     
     if not leaderboard:
         text += "Нет данных\n\n"
     else:
-        # Показываем топ-10 (или всех если меньше)
         for idx, leader in enumerate(leaderboard[:10], 1):
             try:
-                # Безопасное получение данных
                 emoji = leader.get('comment_text', '❓')
                 username = leader.get('username')
                 full_name = leader.get('full_name', 'Unknown')
                 count = leader.get('spam_count', 0)
                 
-                # Формируем отображаемое имя
+                # Формируем имя с экранированием
                 if username and username != "noname":
-                    display_name = f"@{username}"
+                    display_name = f"@{escape_md(username)}"
                 else:
-                    display_name = full_name
+                    display_name = escape_md(full_name)
                 
-                # Склонение для каждого
+                # Склонение
                 if count % 10 == 1 and count % 100 != 11:
                     word = "спам"
                 elif count % 10 in [2, 3, 4] and count % 100 not in [12, 13, 14]:
@@ -280,7 +278,7 @@ async def format_spam_leaderboard(contest: dict, participants: list, minutes_lef
                 else:
                     word = "спамов"
                 
-                # Эмодзи для топ-3
+                # Медали
                 if idx == 1 and count > 0:
                     medal = "🔥🔥🔥"
                 elif idx == 2 and count > 0:
@@ -295,9 +293,8 @@ async def format_spam_leaderboard(contest: dict, participants: list, minutes_lef
                 print(f"❌ Ошибка форматирования участника {idx}: {e}")
                 text += f"{idx} ❓ Unknown — 0\n"
         
-        # Если участников больше 10, показываем троеточие
         if len(leaderboard) > 10:
-            text += f"...\n"
+            text += "\\.\\.\\.\n"
     
     text += f"\n⏰ Осталось {minutes_left} мин\n"
     text += f"💬 Пишите больше!\n\n"
