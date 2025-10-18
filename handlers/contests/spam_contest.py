@@ -9,7 +9,7 @@ import random
 from datetime import datetime
 from aiogram import Router, F, Bot
 from aiogram.types import Message
-from aiogram.utils.markdown import escape_md
+from aiogram.utils import markdown
 import config
 from database_postgres import db
 from utils.filters import ParticipantFilter
