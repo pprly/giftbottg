@@ -14,6 +14,14 @@ import config
 from database_postgres import db
 from utils.filters import ParticipantFilter
 
+def escape_markdown(text: str) -> str:
+    """Экранирует спецсимволы Markdown"""
+    if not text:
+        return text
+    chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
+    for char in chars:
+        text = text.replace(char, '\\' + char)
+    return text
 
 router = Router()
 
@@ -250,7 +258,7 @@ async def format_spam_leaderboard(contest: dict, participants: list, minutes_lef
     
     text = (
         f"⚡ **СПАМ-КОНКУРС ИДЁТ!**\n\n"
-        f"🎁 Приз: {escape_md(contest['prize'])}\n\n"
+        f"🎁 Приз: {escape_markdown(contest['prize'])}\n\n"
         f"🏆 **ТАБЛИЦА ЛИДЕРОВ:**\n\n"
     )
     
@@ -264,13 +272,11 @@ async def format_spam_leaderboard(contest: dict, participants: list, minutes_lef
                 full_name = leader.get('full_name', 'Unknown')
                 count = leader.get('spam_count', 0)
                 
-                # Формируем имя с экранированием
                 if username and username != "noname":
-                    display_name = f"@{escape_md(username)}"
+                    display_name = f"@{escape_markdown(username)}"
                 else:
-                    display_name = escape_md(full_name)
+                    display_name = escape_markdown(full_name)
                 
-                # Склонение
                 if count % 10 == 1 and count % 100 != 11:
                     word = "спам"
                 elif count % 10 in [2, 3, 4] and count % 100 not in [12, 13, 14]:
@@ -278,7 +284,6 @@ async def format_spam_leaderboard(contest: dict, participants: list, minutes_lef
                 else:
                     word = "спамов"
                 
-                # Медали
                 if idx == 1 and count > 0:
                     medal = "🔥🔥🔥"
                 elif idx == 2 and count > 0:
