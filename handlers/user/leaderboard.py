@@ -6,9 +6,18 @@
 from aiogram import Router, F, Bot
 from aiogram.types import CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.utils import markdown
 from database_postgres import db
 import config
 
+def escape_markdown(text: str) -> str:
+    """Экранирует спецсимволы Markdown"""
+    if not text:
+        return text
+    chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
+    for char in chars:
+        text = text.replace(char, '\\' + char)
+    return text
 
 router = Router()
 
