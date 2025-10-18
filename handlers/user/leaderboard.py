@@ -124,11 +124,14 @@ async def show_top_referrals(callback: CallbackQuery):
                 else:
                     emoji = f"{idx}."
                 
+                # ЭКРАНИРУЕМ ИМЯ
+                safe_name = escape_markdown(user['name'])
+                
                 # Подсветка текущего пользователя
                 if user['user_id'] == user_id:
-                    text += f"**{emoji} {user['name']} — {user['points']} реф.**\n"
+                    text += f"**{emoji} {safe_name} — {user['points']} реф.**\n"
                 else:
-                    text += f"{emoji} {user['name']} — {user['points']} реф.\n"
+                    text += f"{emoji} {safe_name} — {user['points']} реф.\n"
             
             # Позиция текущего пользователя
             position, total = await db.get_user_position(user_id, 'referrals')
@@ -205,10 +208,13 @@ async def show_top_wins(callback: CallbackQuery):
                 else:
                     emoji = f"{idx}."
                 
+                # ЭКРАНИРУЕМ ИМЯ
+                safe_name = escape_markdown(user['name'])
+                
                 if user['user_id'] == user_id:
-                    text += f"**{emoji} {user['name']} — {user['wins']} побед**\n"
+                    text += f"**{emoji} {safe_name} — {user['wins']} побед**\n"
                 else:
-                    text += f"{emoji} {user['name']} — {user['wins']} побед\n"
+                    text += f"{emoji} {safe_name} — {user['wins']} побед\n"
             
             position, total = await db.get_user_position(user_id, 'wins')
             user_subscribed = await check_user_subscription(callback.bot, user_id)
@@ -282,10 +288,13 @@ async def show_top_contests(callback: CallbackQuery):
                 else:
                     emoji = f"{idx}."
                 
+                # ЭКРАНИРУЕМ ИМЯ
+                safe_name = escape_markdown(user['name'])
+                
                 if user['user_id'] == user_id:
-                    text += f"**{emoji} {user['name']} — {user['contests']} участий**\n"
+                    text += f"**{emoji} {safe_name} — {user['contests']} участий**\n"
                 else:
-                    text += f"{emoji} {user['name']} — {user['contests']} участий\n"
+                    text += f"{emoji} {safe_name} — {user['contests']} участий\n"
             
             position, total = await db.get_user_position(user_id, 'contests')
             user_subscribed = await check_user_subscription(callback.bot, user_id)
@@ -316,3 +325,4 @@ async def show_top_contests(callback: CallbackQuery):
         parse_mode="Markdown"
     )
     await callback.answer()
+    
