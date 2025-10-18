@@ -21,6 +21,16 @@ router = Router()
 active_tasks = {}
 
 
+def escape_markdown(text: str) -> str:
+    """Экранирует спецсимволы Markdown"""
+    if not text:
+        return text
+    chars = ['_', '*', '[', ']', '(', ')', '~', '`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!']
+    for char in chars:
+        text = text.replace(char, '\\' + char)
+    return text
+
+
 async def publish_contest_announcement(bot: Bot, contest_id: int):
     """Публикация анонса конкурса в канале"""
     contest = await db.get_contest_by_id(contest_id)
@@ -301,13 +311,15 @@ async def end_contest(bot: Bot, contest_id: int):
     
     # Формируем список участников для админа
     text = f"🏁 **Конкурс #{contest_id} завершён!**\n"
-    text += f"🎁 Приз: {contest['prize']}\n"
+    text += f"🎁 Приз: {escape_markdown(contest['prize'])}\n"
     text += "👥 **Участники:**\n"
     
     for p in participants:
         emoji = p['comment_text']
         username = f"@{p['username']}" if p['username'] != "noname" else p['full_name']
-        text += f"{p['position']} {emoji} — {username}\n"
+        # ЭКРАНИРУЕМ ИМЯ
+        safe_username = escape_markdown(username)
+        text += f"{p['position']} {emoji} — {safe_username}\n"
     
     text += "\n\n**Выберите победителя:**\n"
     text += "Отправьте команду: `/win {номер}`\n\n"
@@ -323,3 +335,5 @@ async def end_contest(bot: Bot, contest_id: int):
         print(f"✅ [{contest_id}] Результаты отправлены админу")
     except Exception as e:
         print(f"❌ [{contest_id}] Ошибка отправки результатов: {e}")
+
+        
