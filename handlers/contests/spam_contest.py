@@ -309,7 +309,7 @@ async def format_spam_leaderboard(contest: dict, participants: list, minutes_lef
 
 
 async def run_spam_timer(bot: Bot, contest_id: int, duration_minutes: int):
-    """Таймер спам-конкурса с обновлением таблицы каждые 30 секунд"""
+    """Таймер спам-конкурса с обновлением таблицы раз в минуту"""  # ← ИЗМЕНЕНО описание
     task_key = f"spam_timer_{contest_id}"
     
     try:
@@ -319,8 +319,8 @@ async def run_spam_timer(bot: Bot, contest_id: int, duration_minutes: int):
         
         print(f"⏰ [{contest_id}] Таймер спам-конкурса запущен на {duration_minutes} минут")
         
-        # Общее количество итераций (каждые 30 сек)
-        total_iterations = duration_minutes * 2  # 2 итерации в минуту
+        # ИЗМЕНЕНО: Обновляем раз в минуту вместо 30 секунд
+        total_iterations = duration_minutes  # ← БЫЛО: duration_minutes * 2
         
         for iteration in range(total_iterations, -1, -1):
             # Проверяем не отменена ли задача
@@ -328,8 +328,8 @@ async def run_spam_timer(bot: Bot, contest_id: int, duration_minutes: int):
                 print(f"⛔ [{contest_id}] Таймер спам-конкурса отменён")
                 break
             
-            # Сколько минут осталось
-            minutes_left = iteration // 2
+            # ИЗМЕНЕНО: Прямое значение, не делим на 2
+            minutes_left = iteration  # ← БЫЛО: iteration // 2
             
             # Обновляем таблицу
             leaderboard_text = await format_spam_leaderboard(contest, participants, minutes_left)
@@ -346,9 +346,9 @@ async def run_spam_timer(bot: Bot, contest_id: int, duration_minutes: int):
                 # Иногда Telegram не даёт обновлять если текст не изменился
                 pass
             
-            # Если ещё не конец - ждём 30 секунд
+            # ИЗМЕНЕНО: Ждём 60 секунд вместо 30
             if iteration > 0:
-                await asyncio.sleep(30)
+                await asyncio.sleep(60)  # ← БЫЛО: 30
         
         # Конкурс завершён
         await finish_spam_contest(bot, contest_id)
