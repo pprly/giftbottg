@@ -1,18 +1,19 @@
 from aiogram import Router
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 from aiogram.filters import Command
+from aiogram.filters.command import CommandObject
 
 router = Router()
 
 @router.message(Command("start"))
-async def start_with_rules(message: Message):
+async def start_with_rules(message: Message, command: CommandObject):
     """Обработка deep link с правилами"""
     
-    # Проверяем есть ли параметр
-    args = message.text.split(maxsplit=1)
+    # Получаем аргументы
+    args = command.args
     
-    if len(args) > 1 and args[1] == "rules":
-        # Пользователь пришёл из канала
+    # Если пришли с параметром rules
+    if args == "rules":
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(
                 text="📖 Открыть полные правила",
@@ -36,5 +37,6 @@ async def start_with_rules(message: Message):
         )
         return
     
-    # Обычный /start - передаём дальше в main_menu
-    # (не обрабатываем здесь)
+    # Если НЕ rules - передаём в main_menu
+    from handlers.user.main_menu import cmd_start
+    await cmd_start(message, command)

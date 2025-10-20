@@ -98,3 +98,9 @@ async def show_admin_panel(callback: CallbackQuery):
     # Импортируем функцию из admin.py
     from handlers.admin.admin_menu import show_admin_menu
     await show_admin_menu(callback)
+
+@router.callback_query(F.data == "main_menu")
+async def callback_main_menu(callback: CallbackQuery):
+    """Показать главное меню через callback"""
+    await show_main_menu(callback.message)
+    await callback.answer()
