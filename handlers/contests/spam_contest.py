@@ -10,9 +10,11 @@ from datetime import datetime
 from aiogram import Router, F, Bot
 from aiogram.types import Message
 from aiogram.utils import markdown
+from aiogram.exceptions import TelegramRetryAfter
 import config
 from database_postgres import db
 from utils.filters import ParticipantFilter
+from utils.rate_limiter import rate_limiter
 
 def escape_markdown(text: str) -> str:
     """Экранирует спецсимволы Markdown"""
@@ -335,16 +337,23 @@ async def run_spam_timer(bot: Bot, contest_id: int, duration_minutes: int):
             leaderboard_text = await format_spam_leaderboard(contest, participants, minutes_left)
             
             try:
-                await bot.edit_message_text(
+                await rate_limiter.safe_edit_message(
+                    bot=bot,
                     chat_id=config.CHANNEL_ID,
                     message_id=message_id,
                     text=leaderboard_text,
                     parse_mode="Markdown"
                 )
                 print(f"🔄 [{contest_id}] Таблица обновлена, осталось {minutes_left} мин")
+
+            except TelegramRetryAfter as e:
+                # Telegram попросил подождать - пропускаем это обновление
+                print(f"⏳ FloodWait: Telegram просит подождать {e.retry_after}с (пропускаем)")
+                await asyncio.sleep(e.retry_after)
+
             except Exception as e:
-                # Иногда Telegram не даёт обновлять если текст не изменился
-                pass
+                # Любая другая ошибка - тоже просто пропускаем
+                print(f"⚠️ Ошибка обновления (пропускаем): {e}")
             
             # ИЗМЕНЕНО: Ждём 60 секунд вместо 30
             if iteration > 0:
