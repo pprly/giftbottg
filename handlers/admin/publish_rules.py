@@ -1,5 +1,5 @@
 from aiogram import Router
-from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.filters import Command
 import config
 
@@ -35,11 +35,11 @@ async def publish_rules(message: Message):
         "👇 Нажмите кнопку ниже для полных правил"
     )
     
-    # Кнопка с Web App
+    # Обычная URL-кнопка (не WebApp!)
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
             text="📖 Открыть полные правила",
-            web_app=WebAppInfo(url="https://pprly.github.io/giftbottg/rules.html")
+            url="https://pprly.github.io/giftbottg/rules.html"
         )]
     ])
     
