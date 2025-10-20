@@ -1,9 +1,9 @@
-from aiogram import Router, F
+from aiogram import Router
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 from aiogram.filters import Command
 import config
 
-router = Router() 
+router = Router()
 
 @router.message(Command("publish_rules"))
 async def publish_rules(message: Message):
@@ -38,4 +38,17 @@ async def publish_rules(message: Message):
     # Кнопка с Web App
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
-            text="📖 Открыть полные правила
+            text="📖 Открыть полные правила",
+            web_app=WebAppInfo(url="http://YOUR-IP:8080/rules.html")
+        )]
+    ])
+    
+    # Отправляем в канал
+    await message.bot.send_message(
+        chat_id=config.CHANNEL_ID,
+        text=text,
+        parse_mode="Markdown",
+        reply_markup=keyboard
+    )
+    
+    await message.answer("✅ Правила опубликованы в канале!")
