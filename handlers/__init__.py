@@ -1,6 +1,3 @@
-"""
-Подключение всех роутеров
-"""
 
 from aiogram import Router
 
@@ -16,6 +13,7 @@ def setup_routers():
     from handlers.admin import admin_menu, create_contest, select_winner
     from handlers.contests import voting_contest, random_contest, spam_contest, message_handler
     from handlers.system import auto_approve
+    from handlers.admin import publish_rules
     
     # ⬇️ ВАЖНО: Подключаем message_handler ПЕРВЫМ (до debug)
     router.include_router(message_handler.router)
@@ -39,6 +37,7 @@ def setup_routers():
     router.include_router(admin_menu.router)
     router.include_router(create_contest.router)
     router.include_router(select_winner.router)
+    router.include_router(publish_rules.router)
     
     # Contest handlers
     router.include_router(voting_contest.router)
