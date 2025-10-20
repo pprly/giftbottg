@@ -22,7 +22,7 @@ def escape_markdown(text: str) -> str:
 router = Router()
 
 
- async def check_user_subscription(bot: Bot, user_id: int) -> bool:
+async def check_user_subscription(bot: Bot, user_id: int) -> bool:
 #     """Проверка подписки пользователя на канал"""
         return True
 #     try:
