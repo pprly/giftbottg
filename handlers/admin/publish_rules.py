@@ -32,14 +32,17 @@ async def publish_rules(message: Message):
         "🚫 Нарушение = дисквалификация\n\n"
         "🎁 Призы выдаются в течение 7 дней\n\n"
         "✅ Соответствует Terms of Service Telegram\n\n"
-        "👇 Нажмите кнопку ниже для полных правил"
+        "👇 Откройте бота для просмотра полных правил"
     )
     
-    # Обычная URL-кнопка (не WebApp!)
+    # Deep link в бота
+    bot_info = await message.bot.get_me()
+    bot_username = bot_info.username
+    
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
             text="📖 Открыть полные правила",
-            url="https://pprly.github.io/giftbottg/rules.html"
+            url=f"https://t.me/{bot_username}?start=rules"
         )]
     ])
     

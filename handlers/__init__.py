@@ -8,7 +8,8 @@ def setup_routers():
     """Настройка всех роутеров"""
     
     # Импорты
-    from handlers.user import main_menu, my_stats, referral, achievements, leaderboard, inline_referral
+    
+    from handlers.user import main_menu, my_stats, referral, achievements, leaderboard, inline_referral, rules_handler
     from handlers.faq import faq_menu, contest_types, referral_info, contact_info
     from handlers.admin import admin_menu, create_contest, select_winner
     from handlers.contests import voting_contest, random_contest, spam_contest, message_handler
@@ -20,6 +21,7 @@ def setup_routers():
     print("✅ Message handler подключен первым\n")
     
     # User handlers
+    router.include_router(rules_handler.router)
     router.include_router(main_menu.router)
     router.include_router(my_stats.router)
     router.include_router(referral.router)
