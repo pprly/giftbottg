@@ -39,7 +39,7 @@ async def publish_rules(message: Message):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
             text="📖 Открыть полные правила",
-            web_app=WebAppInfo(url="http://YOUR-IP:8080/rules.html")
+            web_app=WebAppInfo(url="https://pprly.github.io/giftbottg/rules.html")
         )]
     ])
     
