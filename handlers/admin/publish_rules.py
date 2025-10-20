@@ -10,7 +10,7 @@ async def publish_rules(message: Message):
     """Публикация правил в канале с кнопкой"""
     
     # Проверка что это админ
-    if message.from_user.id not in config.ADMIN_IDS:
+    if message.from_user.id != config.ADMIN_ID:
         await message.answer("⛔ У вас нет доступа!")
         return
     
