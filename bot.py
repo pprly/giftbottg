@@ -131,8 +131,16 @@ async def main():
     await restore_active_contests(bot)
     
     # 🆕 ЗАПУСК API СЕРВЕРА ДЛЯ MINI APP
-    from api_server import start_api_server
-    api_runner = await start_api_server()
+    try:
+        from api_server import start_api_server
+        print("📡 Запуск API сервера...")
+        api_runner = await start_api_server()
+        print("✅ API сервер запущен успешно!")
+    except Exception as e:
+        print(f"❌ Ошибка запуска API сервера: {e}")
+        import traceback
+        traceback.print_exc()
+        api_runner = None
     
     try:
         print("🚀 Бот запущен!")
@@ -145,7 +153,7 @@ async def main():
         traceback.print_exc()
     finally:
         # Останавливаем API сервер
-        if 'api_runner' in locals():
+        if 'api_runner' in locals() and api_runner:
             await api_runner.cleanup()
         await shutdown(bot, db)
 
