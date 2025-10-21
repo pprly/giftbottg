@@ -1,7 +1,4 @@
-"""
-PostgreSQL база данных для Contest Bot v2.4
-Замена SQLite для улучшения производительности
-"""
+
 
 import asyncpg
 import json

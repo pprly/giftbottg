@@ -52,3 +52,4 @@ class RateLimiter:
 
 # Глобальный экземпляр
 rate_limiter = RateLimiter()
+
