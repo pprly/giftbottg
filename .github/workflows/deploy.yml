@@ -27,7 +27,7 @@ jobs:
 
     - name: Install dependencies
       working-directory: ./miniapp
-      run: npm ci
+      run: npm install
 
     - name: Build Mini App
       working-directory: ./miniapp
@@ -79,5 +79,3 @@ jobs:
           cd ~/giftbottg
           sudo docker compose pull
           sudo docker compose up -d
-
-          
