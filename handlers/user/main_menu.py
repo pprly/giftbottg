@@ -7,6 +7,7 @@ from aiogram import Router, F
 from aiogram.filters import Command, CommandObject
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.types import WebAppInfo
 import config
 
 
@@ -20,6 +21,12 @@ def get_main_menu_keyboard(user_id: int):
     """
     builder = InlineKeyboardBuilder()
     
+    # 🆕 ГЛАВНАЯ КНОПКА - Открыть Mini App
+    builder.button(
+        text="🚀 Открыть приложение",
+        web_app=WebAppInfo(url="https://pprly.github.io/giftbottg/")
+    )
+    
     # Основные кнопки для всех
     builder.button(text="📊 Моя статистика", callback_data="my_stats")
     builder.button(text="🏆 Достижения", callback_data="achievements")
@@ -32,9 +39,9 @@ def get_main_menu_keyboard(user_id: int):
     
     # Настройка расположения кнопок
     if user_id == config.ADMIN_ID:
-        builder.adjust(2, 2, 1, 1)  # 2-2-1-1
+        builder.adjust(1, 2, 2, 1, 1)  # WebApp отдельно, потом 2-2-1-1
     else:
-        builder.adjust(2, 2, 1)  # 2-2-1
+        builder.adjust(1, 2, 2, 1)  # WebApp отдельно, потом 2-2-1
     
     return builder.as_markup()
 
