@@ -130,6 +130,10 @@ async def main():
     # ✅ ВОССТАНОВЛЕНИЕ АКТИВНЫХ КОНКУРСОВ
     await restore_active_contests(bot)
     
+    # 🆕 ЗАПУСК API СЕРВЕРА ДЛЯ MINI APP
+    from api_server import start_api_server
+    api_runner = await start_api_server()
+    
     try:
         print("🚀 Бот запущен!")
         await dp.start_polling(bot)
@@ -140,6 +144,9 @@ async def main():
         import traceback
         traceback.print_exc()
     finally:
+        # Останавливаем API сервер
+        if 'api_runner' in locals():
+            await api_runner.cleanup()
         await shutdown(bot, db)
 
 

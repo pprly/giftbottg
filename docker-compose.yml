@@ -4,6 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile
     image: 'giftbottg:latest'
+    ports:
+      - "8000:8000"
     networks:
       - telegram
     restart: always
