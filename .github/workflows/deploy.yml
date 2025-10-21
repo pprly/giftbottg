@@ -80,5 +80,25 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd ~/giftbottg
-
-
+          
+          # Скачиваем обновлённый docker-compose.yml с GitHub
+          echo "📥 Downloading docker-compose.yml..."
+          curl -sSL -o docker-compose.yml https://raw.githubusercontent.com/pprly/giftbottg/main/docker-compose.yml
+          
+          # Создаём директорию для Traefik если её нет
+          echo "📁 Setting up Traefik..."
+          mkdir -p traefik
+          touch traefik/acme.json
+          chmod 600 traefik/acme.json
+          
+          # Скачиваем последний Docker образ
+          echo "🐳 Pulling Docker image..."
+          sudo docker compose pull
+          
+          # Перезапускаем все контейнеры
+          echo "🚀 Restarting containers..."
+          sudo docker compose up -d
+          
+          # Показываем статус
+          echo "✅ Container status:"
+          sudo docker compose ps
