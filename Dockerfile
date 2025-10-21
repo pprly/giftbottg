@@ -3,6 +3,7 @@ WORKDIR /usr/src/app
 COPY bot.py .
 COPY config.py .
 COPY database_postgres.py .
+COPY api_server.py .
 COPY requirements.txt . 
 COPY test_debug.py .
 ADD utils /usr/src/app/utils
