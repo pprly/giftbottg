@@ -1,45 +1,34 @@
 import { useState, useEffect } from 'react'
 import { Card, List, Cell, Section, Button, Placeholder } from '@telegram-apps/telegram-ui'
+import { fetchUserStats } from '../api'
 import './StatsPage.css'
 
 function StatsPage({ user, tg }) {
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    // Получаем статистику пользователя из бота
-    fetchStats()
+    loadStats()
   }, [user])
 
-  const fetchStats = async () => {
+  const loadStats = async () => {
     try {
-      // TODO: Здесь будет запрос к твоему боту через API
-      // Пока используем mock данные
-      const mockStats = {
-        referrals: 5,
-        totalContests: 12,
-        totalWins: 3,
-        votingWins: 1,
-        randomWins: 1,
-        spamWins: 1,
-        bestStreak: 2
-      }
-      
-      // Симуляция загрузки
-      setTimeout(() => {
-        setStats(mockStats)
-        setLoading(false)
-      }, 500)
-    } catch (error) {
-      console.error('Ошибка загрузки статистики:', error)
+      setLoading(true)
+      setError(null)
+      const data = await fetchUserStats()
+      setStats(data)
+    } catch (err) {
+      console.error('Ошибка загрузки статистики:', err)
+      setError('Не удалось загрузить статистику')
+    } finally {
       setLoading(false)
     }
   }
 
   const shareReferral = () => {
-    // Открываем реферальную систему через бота
     if (tg) {
-      const botUsername = 'твой_бот' // Из .env потом возьмем
+      const botUsername = import.meta.env.VITE_BOT_USERNAME || 'your_bot'
       const referralLink = `https://t.me/${botUsername}?start=ref_${user?.id}`
       
       tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent('Присоединяйся к конкурсам! 🎁')}`)
@@ -51,6 +40,19 @@ function StatsPage({ user, tg }) {
       <div className="stats-page">
         <Placeholder description="Загрузка статистики...">
           <span style={{ fontSize: '48px' }}>📊</span>
+        </Placeholder>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="stats-page">
+        <Placeholder 
+          description={error}
+          action={<Button onClick={loadStats}>Повторить</Button>}
+        >
+          <span style={{ fontSize: '48px' }}>⚠️</span>
         </Placeholder>
       </div>
     )
