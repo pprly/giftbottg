@@ -132,3 +132,5 @@ volumes:
 networks:
   telegram:
     driver: bridge
+
+    
