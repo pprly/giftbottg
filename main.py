@@ -1,6 +1,6 @@
 """
-Contest Bot v2.4 - Точка входа
-Обновлено: PostgreSQL + восстановление задач
+Contest Bot v2.5 - Точка входа с API сервером
+Обновлено: PostgreSQL + API для Telegram Mini App + Traefik SSL
 """
 
 import asyncio
@@ -79,13 +79,22 @@ async def restore_active_contests(bot: Bot):
     print(f"✅ Восстановлено конкурсов: {len(contests)}\n")
 
 
-async def shutdown(bot: Bot, db: DatabasePostgres):
-    """Корректное завершение работы бота"""
+async def shutdown(bot: Bot, db: DatabasePostgres, api_runner=None):
+    """Корректное завершение работы бота и API"""
     from handlers.contests.voting_contest import active_tasks
     
     print("\n🛑 Завершение работы...")
     
-    # Отменяем все активные задачи
+    # Останавливаем API сервер
+    if api_runner:
+        try:
+            print("   ⏳ Остановка API сервера...")
+            await api_runner.cleanup()
+            print("   ✅ API сервер остановлен")
+        except Exception as e:
+            print(f"   ⚠️ Ошибка остановки API: {e}")
+    
+    # Отменяем все активные задачи конкурсов
     if active_tasks:
         print(f"   ⏳ Отмена {len(active_tasks)} активных задач...")
         for task_name, task in list(active_tasks.items()):
@@ -97,8 +106,13 @@ async def shutdown(bot: Bot, db: DatabasePostgres):
         active_tasks.clear()
         print("   ✅ Все задачи отменены")
     
-    # Закрываем пул соединений
-    await db.close_pool()
+    # Закрываем пул соединений БД
+    try:
+        await db.close_pool()
+        print("   ✅ База данных отключена")
+    except Exception as e:
+        print(f"   ⚠️ Ошибка закрытия БД: {e}")
+    
     print("👋 Бот остановлен корректно")
 
 
@@ -110,52 +124,61 @@ async def main():
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
+    logger = logging.getLogger(__name__)
     
-    # Инициализация PostgreSQL
-    db = DatabasePostgres(config.POSTGRES_DSN)
-    await db.init_pool()
-    await db.init_db()
-    
-    # Установить глобальный экземпляр для других модулей
-    database_postgres.db = db
-    
-    # Создание бота
-    bot = Bot(token=config.BOT_TOKEN)
-    dp = Dispatcher()
-    
-    # Подключение роутеров
-    from handlers import router
-    dp.include_router(router)
-    
-    # ✅ ВОССТАНОВЛЕНИЕ АКТИВНЫХ КОНКУРСОВ
-    await restore_active_contests(bot)
-    
-    # 🆕 ЗАПУСК API СЕРВЕРА ДЛЯ MINI APP
-    try:
-        from api_server import start_api_server
-        print("📡 Запуск API сервера...")
-        api_runner = await start_api_server()
-        print("✅ API сервер запущен успешно!")
-    except Exception as e:
-        print(f"❌ Ошибка запуска API сервера: {e}")
-        import traceback
-        traceback.print_exc()
-        api_runner = None
+    api_runner = None
     
     try:
-        print("🚀 Бот запущен!")
+        # Инициализация PostgreSQL
+        print("🔌 Подключение к базе данных...")
+        db = DatabasePostgres(config.POSTGRES_DSN)
+        await db.init_pool()
+        await db.init_db()
+        print("✅ База данных подключена")
+        
+        # Установить глобальный экземпляр для других модулей
+        database_postgres.db = db
+        
+        # Создание бота
+        print("🤖 Инициализация бота...")
+        bot = Bot(token=config.BOT_TOKEN)
+        dp = Dispatcher()
+        
+        # Подключение роутеров
+        from handlers import router
+        dp.include_router(router)
+        print("✅ Роутеры подключены")
+        
+        # ✅ ВОССТАНОВЛЕНИЕ АКТИВНЫХ КОНКУРСОВ
+        await restore_active_contests(bot)
+        
+        # 🆕 ЗАПУСК API СЕРВЕРА ДЛЯ TELEGRAM MINI APP
+        try:
+            from api_server import start_api_server
+            print("📡 Запуск API сервера для Mini App...")
+            api_runner = await start_api_server()
+            print("✅ API сервер запущен на порту 8000")
+        except Exception as e:
+            logger.error(f"❌ Ошибка запуска API сервера: {e}")
+            import traceback
+            traceback.print_exc()
+            api_runner = None
+        
+        # Запуск бота
+        print("🚀 Бот запущен и готов к работе!\n")
         await dp.start_polling(bot)
+        
     except (KeyboardInterrupt, SystemExit):
         print("\n⚠️  Получен сигнал остановки...")
+        
     except Exception as e:
-        print(f"❌ Ошибка при запуске: {e}")
+        logger.error(f"❌ Критическая ошибка: {e}")
         import traceback
         traceback.print_exc()
+        
     finally:
-        # Останавливаем API сервер
-        if 'api_runner' in locals() and api_runner:
-            await api_runner.cleanup()
-        await shutdown(bot, db)
+        # Корректное завершение работы
+        await shutdown(bot, db, api_runner)
 
 
 if __name__ == "__main__":
@@ -163,3 +186,5 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\n👋 Бот остановлен пользователем")
+
+        
