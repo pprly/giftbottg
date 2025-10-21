@@ -1,0 +1,51 @@
+.leaderboard-page {
+  min-height: 100vh;
+  background: var(--tg-theme-bg-color);
+  padding: 16px;
+}
+
+.leaderboard-header {
+  padding: 20px 0;
+  text-align: center;
+}
+
+.leaderboard-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--tg-theme-text-color);
+  margin-bottom: 8px;
+}
+
+.leaderboard-header p {
+  font-size: 14px;
+  color: var(--tg-theme-hint-color);
+}
+
+.leaderboard-tabs {
+  margin-bottom: 16px;
+}
+
+.rank-badge {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--tg-theme-secondary-bg-color);
+}
+
+.rank {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.rank-1 { font-size: 24px; }
+.rank-2 { font-size: 22px; }
+.rank-3 { font-size: 22px; }
+
+.leader-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--tg-theme-button-color);
+}

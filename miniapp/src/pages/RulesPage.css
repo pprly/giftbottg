@@ -1,0 +1,32 @@
+.rules-page {
+  min-height: 100vh;
+  background: var(--tg-theme-bg-color);
+  padding: 16px;
+}
+
+.rules-header {
+  padding: 20px 0;
+  text-align: center;
+}
+
+.rules-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--tg-theme-text-color);
+  margin-bottom: 8px;
+}
+
+.rules-header p {
+  font-size: 14px;
+  color: var(--tg-theme-hint-color);
+}
+
+.rules-footer {
+  padding: 24px 0;
+  text-align: center;
+}
+
+.rules-footer p {
+  font-size: 14px;
+  color: var(--tg-theme-hint-color);
+}

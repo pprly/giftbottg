@@ -1,0 +1,15 @@
+.navigation {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--tg-theme-bg-color);
+  border-top: 1px solid var(--tg-theme-hint-color);
+  z-index: 1000;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Убираем стандартные стили Tabbar если нужно */
+.navigation [class*="Tabbar"] {
+  background: transparent;
+}

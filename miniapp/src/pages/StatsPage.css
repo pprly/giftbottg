@@ -1,0 +1,45 @@
+.stats-page {
+  min-height: 100vh;
+  background: var(--tg-theme-bg-color);
+  padding: 16px;
+}
+
+.stats-header {
+  padding: 20px 0;
+  text-align: center;
+}
+
+.stats-header h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--tg-theme-text-color);
+  margin-bottom: 8px;
+}
+
+.stats-header p {
+  font-size: 14px;
+  color: var(--tg-theme-hint-color);
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--tg-theme-text-color);
+}
+
+.stat-value.highlight {
+  color: var(--tg-theme-button-color);
+}
+
+.stats-actions {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.stats-actions h3 {
+  color: var(--tg-theme-text-color);
+}
+
+.stats-actions p {
+  color: var(--tg-theme-hint-color);
+}
