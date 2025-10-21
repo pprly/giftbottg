@@ -183,3 +183,4 @@ MESSAGES = {
 AUTO_APPROVE_ENABLED = True
 
 print("✅ Конфигурация загружена из .env")
+
