@@ -656,22 +656,22 @@ class DatabasePostgres:
 
     async def get_leaderboard_by_wins(self, limit: int = 10) -> List[Dict]:
     """Топ пользователей по количеству побед"""
-    async with self.pool.acquire() as conn:
-        rows = await conn.fetch('''
-            SELECT 
-                us.user_id,
-                p.username,
-                p.full_name,
-                us.total_wins,
-                ROW_NUMBER() OVER (ORDER BY us.total_wins DESC) as rank
-            FROM user_stats us
-            LEFT JOIN participants p ON us.user_id = p.user_id
-            WHERE us.total_wins > 0
-            ORDER BY us.total_wins DESC
-            LIMIT $1
-        ''', limit)
-        
-        return [dict(row) for row in rows]
+        async with self.pool.acquire() as conn:
+            rows = await conn.fetch('''
+                SELECT 
+                    us.user_id,
+                    p.username,
+                    p.full_name,
+                    us.total_wins,
+                    ROW_NUMBER() OVER (ORDER BY us.total_wins DESC) as rank
+                FROM user_stats us
+                LEFT JOIN participants p ON us.user_id = p.user_id
+                WHERE us.total_wins > 0
+                ORDER BY us.total_wins DESC
+                LIMIT $1
+            ''', limit)
+            
+            return [dict(row) for row in rows]
 
     async def get_leaderboard_by_referrals(self, limit: int = 10) -> List[Dict]:
         """Топ пользователей по количеству рефералов"""
