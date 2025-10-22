@@ -19,6 +19,7 @@ services:
     command:
       # Основные настройки
       - "--api.dashboard=true"
+      - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       
