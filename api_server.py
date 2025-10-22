@@ -119,21 +119,52 @@ async def get_leaderboard(request):
     try:
         leaderboard_type = request.query.get('type', 'wins')
         
-        # TODO: Добавить методы в database_postgres.py
-        # Пока возвращаем заглушку
+        # Получаем топ из БД
+        if leaderboard_type == 'wins':
+            leaders = await db.get_leaderboard_by_wins(limit=10)
+        elif leaderboard_type == 'referrals':
+            leaders = await db.get_leaderboard_by_referrals(limit=10)
+        elif leaderboard_type == 'contests':
+            leaders = await db.get_leaderboard_by_contests(limit=10)
+        else:
+            return web.json_response(
+                {'error': f'Неизвестный тип: {leaderboard_type}'},
+                status=400
+            )
+        
+        # Форматируем данные для фронтенда
+        formatted_leaders = []
+        for leader in leaders:
+            # Определяем score в зависимости от типа
+            if leaderboard_type == 'wins':
+                score = leader.get('total_wins', 0)
+            elif leaderboard_type == 'referrals':
+                score = leader.get('referral_count', 0)
+            else:  # contests
+                score = leader.get('total_contests', 0)
+            
+            formatted_leaders.append({
+                'rank': leader['rank'],
+                'userId': leader['user_id'],
+                'username': leader.get('username'),
+                'fullName': leader.get('full_name'),
+                'score': score
+            })
+        
         return web.json_response({
             'success': True,
             'type': leaderboard_type,
-            'leaders': []
+            'leaders': formatted_leaders
         })
         
     except Exception as e:
         print(f"❌ Ошибка в get_leaderboard: {e}")
+        import traceback
+        traceback.print_exc()
         return web.json_response(
             {'error': 'Внутренняя ошибка сервера'},
             status=500
         )
-
 
 async def get_achievements(request):
     """
@@ -207,4 +238,3 @@ async def start_api_server():
     print("🌐 API сервер запущен на порту 8000")
     return runner
 
-    
