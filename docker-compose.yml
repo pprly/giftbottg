@@ -1,54 +1,41 @@
 services:
-  # Traefik - Reverse Proxy с автоматическим SSL
   traefik:
     image: traefik:v3.0
     container_name: traefik
     restart: always
     ports:
-      - "80:80"      # HTTP
-      - "443:443"    # HTTPS
-      - "8080:8080"  # Traefik Dashboard (опционально)
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
     networks:
       - telegram
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/acme.json:/acme.json
+    env_file:
+      - .env.traefik
     command:
-      # Основные настройки
       - "--api.dashboard=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      
-      # HTTP entrypoint
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-      
-      # HTTPS entrypoint
       - "--entrypoints.websecure.address=:443"
-      
-      # Let's Encrypt
       - "--certificatesresolvers.letsencrypt.acme.email=evgepperly@gmail.com"
       - "--certificatesresolvers.letsencrypt.acme.storage=/acme.json"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
-      
-      # Логи
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
       - "--log.level=INFO"
       - "--accesslog=true"
     labels:
-      # Dashboard доступен по https://vpnedenor.ru/dashboard/
       - "traefik.enable=true"
       - "traefik.http.routers.dashboard.rule=Host(`vpnedenor.ru`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
 
-  # Telegram Bot + API сервер
   bot:
-    build:
-      context: .
-      dockerfile: Dockerfile
     image: ghcr.io/pprly/giftbottg:latest
     container_name: giftbot
     restart: always
@@ -63,26 +50,19 @@ services:
       - traefik
     labels:
       - "traefik.enable=true"
-      
-      # API роутинг: https://vpnedenor.ru/api/*
       - "traefik.http.routers.api.rule=Host(`vpnedenor.ru`) && PathPrefix(`/api`)"
       - "traefik.http.routers.api.entrypoints=websecure"
       - "traefik.http.routers.api.tls.certresolver=letsencrypt"
       - "traefik.http.routers.api.service=api"
       - "traefik.http.services.api.loadbalancer.server.port=8000"
-      
-      # CORS middleware
       - "traefik.http.middlewares.api-cors.headers.accesscontrolallowmethods=GET,POST,OPTIONS"
       - "traefik.http.middlewares.api-cors.headers.accesscontrolalloworiginlist=https://pprly.github.io"
       - "traefik.http.middlewares.api-cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
       - "traefik.http.middlewares.api-cors.headers.accesscontrolmaxage=100"
       - "traefik.http.routers.api.middlewares=api-cors,api-ratelimit"
-      
-      # Rate limiting (100 запросов в минуту)
       - "traefik.http.middlewares.api-ratelimit.ratelimit.average=100"
       - "traefik.http.middlewares.api-ratelimit.ratelimit.burst=50"
 
-  # PostgreSQL Database
   db:
     image: postgres:18
     container_name: giftbot-db
@@ -98,32 +78,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  # Nginx для статических файлов (rules.html и т.д.)
-  nginx-static:
-    image: nginx:alpine
-    container_name: giftbot-static
-    restart: always
-    networks:
-      - telegram
-    volumes:
-      - ./static:/usr/share/nginx/html:ro
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    depends_on:
-      - traefik
-    labels:
-      - "traefik.enable=true"
-      
-      # Статика доступна по https://vpnedenor.ru/static/*
-      - "traefik.http.routers.static.rule=Host(`vpnedenor.ru`) && PathPrefix(`/static`)"
-      - "traefik.http.routers.static.entrypoints=websecure"
-      - "traefik.http.routers.static.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.static.service=static"
-      - "traefik.http.services.static.loadbalancer.server.port=80"
-      
-      # Strip /static prefix
-      - "traefik.http.middlewares.static-strip.stripprefix.prefixes=/static"
-      - "traefik.http.routers.static.middlewares=static-strip"
 
 volumes:
   postgres-data:
