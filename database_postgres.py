@@ -655,7 +655,7 @@ class DatabasePostgres:
             return contest
 
     async def get_leaderboard_by_wins(self, limit: int = 10) -> List[Dict]:
-    """Топ пользователей по количеству побед"""
+        """Топ пользователей по количеству побед"""
         async with self.pool.acquire() as conn:
             rows = await conn.fetch('''
                 SELECT 
