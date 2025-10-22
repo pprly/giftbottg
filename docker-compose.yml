@@ -4,6 +4,7 @@ services:
     image: traefik:v3.0
     container_name: traefik
     restart: always
+    user: "root"
     ports:
       - "80:80"      # HTTP
       - "443:443"    # HTTPS
@@ -52,6 +53,8 @@ services:
     restart: always
     networks:
       - telegram
+    ports:
+      - "8000:8000"
     env_file:
       - ./.env
     environment:
