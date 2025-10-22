@@ -166,28 +166,33 @@ async def get_achievements(request):
         )
 
 
-# CORS для разработки
-async def add_cors_headers(request, response):
+# CORS middleware (ИСПРАВЛЕНО)
+@web.middleware
+async def cors_middleware(request, handler):
     """Добавляет CORS заголовки"""
-    response.headers['Access-Control-Allow-Origin'] = '*'
+    # Обрабатываем preflight OPTIONS запросы
+    if request.method == 'OPTIONS':
+        response = web.Response()
+    else:
+        response = await handler(request)
+    
+    # Добавляем CORS заголовки
+    response.headers['Access-Control-Allow-Origin'] = 'https://pprly.github.io'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    response.headers['Access-Control-Max-Age'] = '86400'
+    
     return response
 
 
 def create_app():
     """Создаёт aiohttp приложение"""
-    app = web.Application()
+    app = web.Application(middlewares=[cors_middleware])
     
     # Роуты
     app.router.add_get('/api/stats', get_user_stats)
     app.router.add_get('/api/leaderboard', get_leaderboard)
     app.router.add_get('/api/achievements', get_achievements)
-    
-    # CORS middleware
-    app.middlewares.append(lambda app, handler: 
-        lambda request: add_cors_headers(request, handler(request))
-    )
     
     return app
 
@@ -201,3 +206,5 @@ async def start_api_server():
     await site.start()
     print("🌐 API сервер запущен на порту 8000")
     return runner
+
+    
