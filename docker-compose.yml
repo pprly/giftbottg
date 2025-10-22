@@ -1,12 +1,13 @@
 services:
+  # Traefik - Reverse Proxy с автоматическим SSL (DNS Challenge)
   traefik:
     image: traefik:v3.0
     container_name: traefik
     restart: always
     ports:
-      - "80:80"
-      - "443:443"
-      - "8080:8080"
+      - "80:80"      # HTTP
+      - "443:443"    # HTTPS
+      - "8080:8080"  # Traefik Dashboard
     networks:
       - telegram
     volumes:
@@ -15,17 +16,26 @@ services:
     env_file:
       - .env.traefik
     command:
+      # Основные настройки
       - "--api.dashboard=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
+      
+      # HTTP entrypoint
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      
+      # HTTPS entrypoint
       - "--entrypoints.websecure.address=:443"
+      
+      # Let's Encrypt DNS Challenge (для Cloudflare)
       - "--certificatesresolvers.letsencrypt.acme.email=evgepperly@gmail.com"
       - "--certificatesresolvers.letsencrypt.acme.storage=/acme.json"
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge=true"
       - "--certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare"
+      
+      # Логи
       - "--log.level=INFO"
       - "--accesslog=true"
     labels:
@@ -35,6 +45,7 @@ services:
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
 
+  # Telegram Bot + API сервер
   bot:
     image: ghcr.io/pprly/giftbottg:latest
     container_name: giftbot
@@ -50,19 +61,26 @@ services:
       - traefik
     labels:
       - "traefik.enable=true"
+      
+      # API роутинг: https://vpnedenor.ru/api/*
       - "traefik.http.routers.api.rule=Host(`vpnedenor.ru`) && PathPrefix(`/api`)"
       - "traefik.http.routers.api.entrypoints=websecure"
       - "traefik.http.routers.api.tls.certresolver=letsencrypt"
       - "traefik.http.routers.api.service=api"
       - "traefik.http.services.api.loadbalancer.server.port=8000"
+      
+      # CORS middleware
       - "traefik.http.middlewares.api-cors.headers.accesscontrolallowmethods=GET,POST,OPTIONS"
       - "traefik.http.middlewares.api-cors.headers.accesscontrolalloworiginlist=https://pprly.github.io"
       - "traefik.http.middlewares.api-cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
       - "traefik.http.middlewares.api-cors.headers.accesscontrolmaxage=100"
       - "traefik.http.routers.api.middlewares=api-cors,api-ratelimit"
+      
+      # Rate limiting
       - "traefik.http.middlewares.api-ratelimit.ratelimit.average=100"
       - "traefik.http.middlewares.api-ratelimit.ratelimit.burst=50"
 
+  # PostgreSQL Database
   db:
     image: postgres:18
     container_name: giftbot-db
