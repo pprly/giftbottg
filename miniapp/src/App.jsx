@@ -19,7 +19,7 @@ function App() {
     if (app) {
       app.ready()
       app.expand()
-      app.enableClosingConfirmation() // Подтверждение при закрытии
+      
       
       setTg(app)
       setUser(app.initDataUnsafe?.user)

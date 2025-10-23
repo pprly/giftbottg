@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Card, List, Cell, Section, Button, Placeholder } from '@telegram-apps/telegram-ui'
+import { Button, Placeholder, Card } from '@telegram-apps/telegram-ui'
 import { fetchUserStats } from '../api'
 import './StatsPage.css'
 
@@ -60,61 +60,103 @@ function StatsPage({ user, tg }) {
 
   return (
     <div className="stats-page">
-      <div className="stats-header">
-        <h1>Привет, {user?.first_name || 'Пользователь'}! 👋</h1>
-        <p>Твоя статистика в боте</p>
+      {/* Hero секция */}
+      <div className="stats-hero">
+        <div className="stats-hero-content">
+          <h1 className="stats-hero-title">
+            Привет, {user?.first_name || 'Пользователь'}! 👋
+          </h1>
+          <p className="stats-hero-subtitle">
+            Твоя статистика в Gift Bot
+          </p>
+        </div>
       </div>
 
-      <List>
-        <Section header="📈 Основная статистика">
-          <Cell 
-            subtitle="Рефералов"
-            after={<span className="stat-value">{stats.referrals}</span>}
-          >
-            👥 Приглашено друзей
-          </Cell>
-          <Cell 
-            subtitle="Участий в конкурсах"
-            after={<span className="stat-value">{stats.totalContests}</span>}
-          >
-            🎯 Участие
-          </Cell>
-          <Cell 
-            subtitle="Побед"
-            after={<span className="stat-value highlight">{stats.totalWins}</span>}
-          >
-            🏆 Победы
-          </Cell>
-        </Section>
+      {/* Главные метрики */}
+      <div className="stats-grid">
+        <Card className="stat-card stat-card-primary">
+          <div className="stat-icon">🏆</div>
+          <div className="stat-value">{stats.totalWins}</div>
+          <div className="stat-label">Побед</div>
+        </Card>
 
-        {stats.totalWins > 0 && (
-          <Section header="🎖️ Победы по типам">
-            <Cell after={stats.votingWins}>🗳️ Голосовательные</Cell>
-            <Cell after={stats.randomWins}>🎰 Рандомайзер</Cell>
-            <Cell after={stats.spamWins}>⚡ Спам-конкурс</Cell>
-          </Section>
-        )}
+        <Card className="stat-card stat-card-secondary">
+          <div className="stat-icon">🎯</div>
+          <div className="stat-value">{stats.totalContests}</div>
+          <div className="stat-label">Участий</div>
+        </Card>
+
+        <Card className="stat-card stat-card-accent">
+          <div className="stat-icon">👥</div>
+          <div className="stat-value">{stats.referrals}</div>
+          <div className="stat-label">Рефералов</div>
+        </Card>
 
         {stats.bestStreak > 0 && (
-          <Section header="🔥 Достижения">
-            <Cell after={stats.bestStreak}>
-              Лучшая серия побед
-            </Cell>
-          </Section>
+          <Card className="stat-card stat-card-fire">
+            <div className="stat-icon">🔥</div>
+            <div className="stat-value">{stats.bestStreak}</div>
+            <div className="stat-label">Лучшая серия</div>
+          </Card>
         )}
-      </List>
+      </div>
 
-      <div className="stats-actions">
-        <Card>
-          <div style={{ padding: '16px' }}>
-            <h3 style={{ marginBottom: '8px' }}>💡 Пригласи друзей!</h3>
-            <p style={{ fontSize: '14px', opacity: 0.7, marginBottom: '12px' }}>
-              Получай бонусы за каждого друга
+      {/* Детальная статистика побед */}
+      {stats.totalWins > 0 && (
+        <div className="stats-section">
+          <h2 className="section-title">🎖️ Твои победы</h2>
+          <Card className="stats-detailed-card">
+            <div className="detailed-stat-row">
+              <div className="detailed-stat-item">
+                <span className="detailed-stat-emoji">🗳️</span>
+                <div className="detailed-stat-info">
+                  <div className="detailed-stat-label">Голосовательные</div>
+                  <div className="detailed-stat-value">{stats.votingWins}</div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="detailed-stat-divider"></div>
+            
+            <div className="detailed-stat-row">
+              <div className="detailed-stat-item">
+                <span className="detailed-stat-emoji">🎰</span>
+                <div className="detailed-stat-info">
+                  <div className="detailed-stat-label">Рандомайзер</div>
+                  <div className="detailed-stat-value">{stats.randomWins}</div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="detailed-stat-divider"></div>
+            
+            <div className="detailed-stat-row">
+              <div className="detailed-stat-item">
+                <span className="detailed-stat-emoji">⚡</span>
+                <div className="detailed-stat-info">
+                  <div className="detailed-stat-label">Спам-конкурс</div>
+                  <div className="detailed-stat-value">{stats.spamWins}</div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Реферальная карточка */}
+      <div className="stats-section">
+        <Card className="referral-card">
+          <div className="referral-card-content">
+            <div className="referral-icon">🎁</div>
+            <h3 className="referral-title">Пригласи друзей!</h3>
+            <p className="referral-description">
+              Получай бонусы за каждого приглашённого друга
             </p>
             <Button 
               size="l" 
               stretched 
               onClick={shareReferral}
+              className="referral-button"
             >
               📤 Поделиться ссылкой
             </Button>
