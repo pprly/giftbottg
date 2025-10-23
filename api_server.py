@@ -182,15 +182,131 @@ async def get_achievements(request):
         user_data = validate_init_data(init_data)
         user_id = user_data.get('id')
         
-        # TODO: Получить достижения из БД
-        # Пока возвращаем заглушку
+        if not user_id:
+            return web.json_response(
+                {'error': 'user_id отсутствует'},
+                status=400
+            )
+        
+        # Получаем статистику для подсчета прогресса
+        stats = await db.get_user_stats(user_id)
+        referral_count = await db.get_referral_count(user_id)
+        
+        # Список всех достижений с прогрессом
+        all_achievements = [
+            # Участие в конкурсах
+            {
+                'id': 'newbie',
+                'name': '🎯 Новичок',
+                'emoji': '🎯',
+                'description': 'Участвуй в 5 конкурсах',
+                'target': 5,
+                'progress': min(stats.get('total_contests', 0), 5),
+                'earned': stats.get('total_contests', 0) >= 5
+            },
+            {
+                'id': 'regular',
+                'name': '⭐ Постоялец',
+                'emoji': '⭐',
+                'description': 'Участвуй в 20 конкурсах',
+                'target': 20,
+                'progress': min(stats.get('total_contests', 0), 20),
+                'earned': stats.get('total_contests', 0) >= 20
+            },
+            {
+                'id': 'veteran',
+                'name': '👑 Ветеран',
+                'emoji': '👑',
+                'description': 'Участвуй в 50 конкурсах',
+                'target': 50,
+                'progress': min(stats.get('total_contests', 0), 50),
+                'earned': stats.get('total_contests', 0) >= 50
+            },
+            
+            # Победы
+            {
+                'id': 'first_win',
+                'name': '🏆 Первая победа',
+                'emoji': '🏆',
+                'description': 'Выиграй свой первый конкурс',
+                'target': 1,
+                'progress': min(stats.get('total_wins', 0), 1),
+                'earned': stats.get('total_wins', 0) >= 1
+            },
+            {
+                'id': 'winner',
+                'name': '🌟 Победитель',
+                'emoji': '🌟',
+                'description': 'Выиграй 5 конкурсов',
+                'target': 5,
+                'progress': min(stats.get('total_wins', 0), 5),
+                'earned': stats.get('total_wins', 0) >= 5
+            },
+            {
+                'id': 'champion',
+                'name': '💎 Чемпион',
+                'emoji': '💎',
+                'description': 'Выиграй 10 конкурсов',
+                'target': 10,
+                'progress': min(stats.get('total_wins', 0), 10),
+                'earned': stats.get('total_wins', 0) >= 10
+            },
+            
+            # Рефералы
+            {
+                'id': 'recruiter',
+                'name': '👋 Друг',
+                'emoji': '👋',
+                'description': 'Пригласи 5 друзей',
+                'target': 5,
+                'progress': min(referral_count, 5),
+                'earned': referral_count >= 5
+            },
+            {
+                'id': 'influencer',
+                'name': '🌟 Популярный',
+                'emoji': '🌟',
+                'description': 'Пригласи 25 друзей',
+                'target': 25,
+                'progress': min(referral_count, 25),
+                'earned': referral_count >= 25
+            },
+            {
+                'id': 'legend',
+                'name': '🔥 Легенда',
+                'emoji': '🔥',
+                'description': 'Пригласи 100 друзей',
+                'target': 100,
+                'progress': min(referral_count, 100),
+                'earned': referral_count >= 100
+            },
+            
+            # Серии побед
+            {
+                'id': 'streak',
+                'name': '🔥 Серия побед',
+                'emoji': '🔥',
+                'description': 'Выиграй 3 раза подряд',
+                'target': 3,
+                'progress': min(stats.get('best_win_streak', 0), 3),
+                'earned': stats.get('best_win_streak', 0) >= 3
+            }
+        ]
+        
         return web.json_response({
             'success': True,
-            'achievements': []
+            'achievements': all_achievements
         })
         
+    except ValueError as e:
+        return web.json_response(
+            {'error': f'Невалидные данные: {str(e)}'},
+            status=401
+        )
     except Exception as e:
         print(f"❌ Ошибка в get_achievements: {e}")
+        import traceback
+        traceback.print_exc()
         return web.json_response(
             {'error': 'Внутренняя ошибка сервера'},
             status=500
