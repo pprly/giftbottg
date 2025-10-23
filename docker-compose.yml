@@ -52,6 +52,11 @@ services:
     image: ghcr.io/pprly/giftbottg:latest
     container_name: giftbot
     restart: always
+    # DNS серверы для решения проблемы с api.telegram.org
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+      - 1.1.1.1
     networks:
       - telegram
     ports:
@@ -108,4 +113,3 @@ volumes:
 networks:
   telegram:
     driver: bridge
-
