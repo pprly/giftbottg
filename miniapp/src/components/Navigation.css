@@ -4,10 +4,12 @@
   left: 0;
   right: 0;
   background: var(--tg-theme-bg-color);
-  border-top: 1px solid rgba(var(--tg-theme-hint-color), 0.2);
+  border-top: 1px solid rgba(128, 128, 128, 0.3);
   z-index: 1000;
-  padding-bottom: env(safe-area-inset-bottom, 0);
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  /* Увеличенный отступ снизу для iPhone */
+  padding-bottom: max(env(safe-area-inset-bottom), 20px);
+  padding-top: 8px;
 }
 
 /* Убираем стандартные стили Tabbar */
@@ -17,52 +19,66 @@
 
 /* Улучшаем видимость текста в табах */
 .navigation [class*="Tabbar"] [class*="Item"] {
-  padding: 8px 4px;
+  padding: 8px 4px 12px 4px;
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Текст таба */
-.navigation [class*="Tabbar"] [class*="text"],
-.navigation [class*="Tabbar"] span[class*=""] {
-  font-size: 11px !important;
+/* Текст таба - УВЕЛИЧЕН для лучшей видимости */
+.navigation [class*="Tabbar"] [class*="text"] {
+  font-size: 12px !important;
   font-weight: 600 !important;
   color: var(--tg-theme-hint-color) !important;
-  margin-top: 4px;
+  margin-top: 4px !important;
+  line-height: 1.2 !important;
+  text-align: center !important;
 }
 
 /* Активный таб */
-.navigation [class*="Tabbar"] [class*="selected"] [class*="text"],
-.navigation [class*="Tabbar"] [class*="selected"] span {
+.navigation [class*="Tabbar"] [class*="selected"] {
+  color: var(--tg-theme-button-color) !important;
+}
+
+.navigation [class*="Tabbar"] [class*="selected"] [class*="text"] {
   color: var(--tg-theme-button-color) !important;
 }
 
 /* Иконки */
 .navigation [class*="Tabbar"] > * > span:first-child {
-  font-size: 24px !important;
-  margin-bottom: 2px;
+  font-size: 26px !important;
+  display: block !important;
+  margin-bottom: 4px !important;
 }
 
-/* Для тёмной темы */
+/* Для тёмной темы - увеличиваем контраст */
 @media (prefers-color-scheme: dark) {
   .navigation {
-    background: var(--tg-theme-secondary-bg-color);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--tg-theme-secondary-bg-color, #1c1c1e);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
   }
   
-  .navigation [class*="Tabbar"] [class*="text"],
-  .navigation [class*="Tabbar"] span[class*=""] {
-    color: rgba(255, 255, 255, 0.6) !important;
+  .navigation [class*="Tabbar"] [class*="text"] {
+    color: rgba(255, 255, 255, 0.7) !important;
   }
   
-  .navigation [class*="Tabbar"] [class*="selected"] [class*="text"],
-  .navigation [class*="Tabbar"] [class*="selected"] span {
-    color: var(--tg-theme-button-color) !important;
+  .navigation [class*="Tabbar"] [class*="selected"] [class*="text"] {
+    color: var(--tg-theme-button-color, #0088cc) !important;
   }
 }
 
-/* Для iPhone (безопасная зона) */
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
+/* Дополнительный fallback для iPhone */
+@supports (-webkit-touch-callout: none) {
   .navigation {
-    padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
+    padding-bottom: max(env(safe-area-inset-bottom), 24px) !important;
   }
+}
+
+/* Увеличиваем отступ контента сверху, чтобы не перекрывалось навигацией */
+body {
+  padding-bottom: max(env(safe-area-inset-bottom), 90px);
 }
 

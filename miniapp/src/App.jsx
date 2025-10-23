@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AppRoot } from '@telegram-apps/telegram-ui'
 
-// Импорт страниц (создадим их дальше)
+// Импорт страниц
 import StatsPage from './pages/StatsPage'
 import LeaderboardPage from './pages/LeaderboardPage'
 import AchievementsPage from './pages/AchievementsPage'
@@ -19,7 +19,7 @@ function App() {
     if (app) {
       app.ready()
       app.expand()
-      
+      // app.enableClosingConfirmation() // ← УБРАЛИ подтверждение при закрытии
       
       setTg(app)
       setUser(app.initDataUnsafe?.user)
@@ -46,7 +46,8 @@ function App() {
   return (
     <AppRoot>
       <Router>
-        <div style={{ paddingBottom: '70px' }}>
+        {/* Увеличен отступ снизу для iPhone */}
+        <div style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 100px)' }}>
           <Routes>
             <Route path="/" element={<StatsPage user={user} tg={tg} />} />
             <Route path="/leaderboard" element={<LeaderboardPage tg={tg} />} />
@@ -61,3 +62,4 @@ function App() {
 }
 
 export default App
+
