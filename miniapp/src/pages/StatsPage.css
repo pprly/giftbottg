@@ -171,6 +171,37 @@
   text-align: center;
 }
 
+.referral-stats {
+  margin-bottom: 20px;
+}
+
+.referral-count {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.referral-count-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 4px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.referral-count-label {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.referral-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 20px 0;
+}
+
 .referral-icon {
   font-size: 56px;
   margin-bottom: 12px;

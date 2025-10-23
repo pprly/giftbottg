@@ -4,12 +4,65 @@
   left: 0;
   right: 0;
   background: var(--tg-theme-bg-color);
-  border-top: 1px solid var(--tg-theme-hint-color);
+  border-top: 1px solid rgba(var(--tg-theme-hint-color), 0.2);
   z-index: 1000;
   padding-bottom: env(safe-area-inset-bottom, 0);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Убираем стандартные стили Tabbar если нужно */
+/* Убираем стандартные стили Tabbar */
 .navigation [class*="Tabbar"] {
   background: transparent;
 }
+
+/* Улучшаем видимость текста в табах */
+.navigation [class*="Tabbar"] [class*="Item"] {
+  padding: 8px 4px;
+}
+
+/* Текст таба */
+.navigation [class*="Tabbar"] [class*="text"],
+.navigation [class*="Tabbar"] span[class*=""] {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: var(--tg-theme-hint-color) !important;
+  margin-top: 4px;
+}
+
+/* Активный таб */
+.navigation [class*="Tabbar"] [class*="selected"] [class*="text"],
+.navigation [class*="Tabbar"] [class*="selected"] span {
+  color: var(--tg-theme-button-color) !important;
+}
+
+/* Иконки */
+.navigation [class*="Tabbar"] > * > span:first-child {
+  font-size: 24px !important;
+  margin-bottom: 2px;
+}
+
+/* Для тёмной темы */
+@media (prefers-color-scheme: dark) {
+  .navigation {
+    background: var(--tg-theme-secondary-bg-color);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .navigation [class*="Tabbar"] [class*="text"],
+  .navigation [class*="Tabbar"] span[class*=""] {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+  
+  .navigation [class*="Tabbar"] [class*="selected"] [class*="text"],
+  .navigation [class*="Tabbar"] [class*="selected"] span {
+    color: var(--tg-theme-button-color) !important;
+  }
+}
+
+/* Для iPhone (безопасная зона) */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .navigation {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 8px);
+  }
+}
+

@@ -86,12 +86,6 @@ function StatsPage({ user, tg }) {
           <div className="stat-label">Участий</div>
         </Card>
 
-        <Card className="stat-card stat-card-accent">
-          <div className="stat-icon">👥</div>
-          <div className="stat-value">{stats.referrals}</div>
-          <div className="stat-label">Рефералов</div>
-        </Card>
-
         {stats.bestStreak > 0 && (
           <Card className="stat-card stat-card-fire">
             <div className="stat-icon">🔥</div>
@@ -147,10 +141,19 @@ function StatsPage({ user, tg }) {
       <div className="stats-section">
         <Card className="referral-card">
           <div className="referral-card-content">
+            <div className="referral-stats">
+              <div className="referral-count">
+                <div className="referral-count-value">{stats.referrals}</div>
+                <div className="referral-count-label">👥 Приглашено друзей</div>
+              </div>
+            </div>
+            
+            <div className="referral-divider"></div>
+            
             <div className="referral-icon">🎁</div>
-            <h3 className="referral-title">Пригласи друзей!</h3>
+            <h3 className="referral-title">Пригласи ещё больше!</h3>
             <p className="referral-description">
-              Получай бонусы за каждого приглашённого друга
+              Получай бонусы за каждого приглашённого друга и участвуй в специальных конкурсах
             </p>
             <Button 
               size="l" 
