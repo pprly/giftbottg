@@ -660,18 +660,19 @@ class DatabasePostgres:
             rows = await conn.fetch('''
                 SELECT 
                     us.user_id,
-                    p.username,
-                    p.full_name,
+                    MAX(p.username) as username,
+                    MAX(p.full_name) as full_name,
                     us.total_wins,
-                    ROW_NUMBER() OVER (ORDER BY us.total_wins DESC) as rank
+                    ROW_NUMBER() OVER (ORDER BY us.total_wins DESC, us.user_id) as rank
                 FROM user_stats us
                 LEFT JOIN participants p ON us.user_id = p.user_id
                 WHERE us.total_wins > 0
-                ORDER BY us.total_wins DESC
+                GROUP BY us.user_id, us.total_wins
+                ORDER BY us.total_wins DESC, us.user_id
                 LIMIT $1
             ''', limit)
-            
-            return [dict(row) for row in rows]
+        
+        return [dict(row) for row in rows]
 
     async def get_leaderboard_by_referrals(self, limit: int = 10) -> List[Dict]:
         """Топ пользователей по количеству рефералов"""
@@ -699,14 +700,15 @@ class DatabasePostgres:
             rows = await conn.fetch('''
                 SELECT 
                     us.user_id,
-                    p.username,
-                    p.full_name,
+                    MAX(p.username) as username,
+                    MAX(p.full_name) as full_name,
                     us.total_contests,
-                    ROW_NUMBER() OVER (ORDER BY us.total_contests DESC) as rank
+                    ROW_NUMBER() OVER (ORDER BY us.total_contests DESC, us.user_id) as rank
                 FROM user_stats us
                 LEFT JOIN participants p ON us.user_id = p.user_id
                 WHERE us.total_contests > 0
-                ORDER BY us.total_contests DESC
+                GROUP BY us.user_id, us.total_contests
+                ORDER BY us.total_contests DESC, us.user_id
                 LIMIT $1
             ''', limit)
             
