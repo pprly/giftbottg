@@ -1,36 +1,45 @@
 import { useState, useEffect } from 'react'
-import { Card } from '@telegram-apps/telegram-ui'
+import { Card, Placeholder, Button } from '@telegram-apps/telegram-ui'
+import { fetchAchievements } from '../api'
 import './AchievementsPage.css'
 
 function AchievementsPage({ user, tg }) {
   const [achievements, setAchievements] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    fetchAchievements()
+    loadAchievements()
   }, [user])
 
-  const fetchAchievements = async () => {
+  const loadAchievements = async () => {
     try {
-      // TODO: Запрос к API бота
-      // Mock данные
-      const mockAchievements = [
-        { id: 1, name: 'Новичок', emoji: '🎯', description: 'Участвовать в 5 конкурсах', progress: 5, target: 5, earned: true },
-        { id: 2, name: 'Везунчик', emoji: '🍀', description: 'Выиграть 5 раз', progress: 3, target: 5, earned: false },
-        { id: 3, name: 'Друг', emoji: '👋', description: 'Пригласить 5 друзей', progress: 5, target: 5, earned: true },
-        { id: 4, name: 'Популярный', emoji: '🌟', description: 'Пригласить 25 друзей', progress: 5, target: 25, earned: false },
-        { id: 5, name: 'Серия побед', emoji: '🔥', description: 'Выиграть 3 раза подряд', progress: 2, target: 3, earned: false },
-        { id: 6, name: 'Продвинутый', emoji: '⭐', description: 'Участвовать в 50 конкурсах', progress: 12, target: 50, earned: false }
-      ]
-
-      setTimeout(() => {
-        setAchievements(mockAchievements)
-        setLoading(false)
-      }, 300)
-    } catch (error) {
-      console.error('Ошибка загрузки достижений:', error)
+      setLoading(true)
+      setError(null)
+      const data = await fetchAchievements()
+      setAchievements(data)
+    } catch (err) {
+      console.error('Ошибка загрузки достижений:', err)
+      setError('Не удалось загрузить достижения')
+      // Временно показываем mock данные если API не работает
+      setAchievements([
+        { id: 'newbie', name: 'Новичок', emoji: '🎯', description: 'Участвовать в 5 конкурсах', progress: 0, target: 5, earned: false },
+        { id: 'first_win', name: 'Первая победа', emoji: '🏆', description: 'Выиграть первый конкурс', progress: 0, target: 1, earned: false },
+        { id: 'recruiter', name: 'Друг', emoji: '👋', description: 'Пригласить 5 друзей', progress: 0, target: 5, earned: false },
+      ])
+    } finally {
       setLoading(false)
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="achievements-page">
+        <Placeholder description="Загрузка достижений...">
+          <span style={{ fontSize: '48px' }}>⭐</span>
+        </Placeholder>
+      </div>
+    )
   }
 
   const earnedCount = achievements.filter(a => a.earned).length
@@ -41,6 +50,15 @@ function AchievementsPage({ user, tg }) {
         <h1>⭐ Достижения</h1>
         <p>Получено: {earnedCount} из {achievements.length}</p>
       </div>
+
+      {error && (
+        <div style={{ padding: '16px', textAlign: 'center', color: 'var(--tg-theme-hint-color)' }}>
+          <p>{error}</p>
+          <Button onClick={loadAchievements} style={{ marginTop: '12px' }}>
+            Повторить
+          </Button>
+        </div>
+      )}
 
       <div className="achievements-grid">
         {achievements.map(achievement => (

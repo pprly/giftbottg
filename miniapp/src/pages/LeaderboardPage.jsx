@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { List, Cell, Section, Placeholder, SegmentedControl } from '@telegram-apps/telegram-ui'
+import { fetchLeaderboard } from '../api'
 import './LeaderboardPage.css'
 
 function LeaderboardPage({ tg }) {
   const [activeTab, setActiveTab] = useState('wins')
   const [leaders, setLeaders] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     fetchLeaders(activeTab)
@@ -13,39 +15,25 @@ function LeaderboardPage({ tg }) {
 
   const fetchLeaders = async (type) => {
     setLoading(true)
+    setError(null)
     try {
-      // TODO: Запрос к API бота
-      // Пока mock данные
-      const mockData = {
-        wins: [
-          { id: 1, name: 'Алексей', value: 15, avatar: '👑' },
-          { id: 2, name: 'Мария', value: 12, avatar: '🥈' },
-          { id: 3, name: 'Дмитрий', value: 10, avatar: '🥉' },
-          { id: 4, name: 'Анна', value: 8, avatar: '👤' },
-          { id: 5, name: 'Иван', value: 7, avatar: '👤' }
-        ],
-        referrals: [
-          { id: 1, name: 'Елена', value: 25, avatar: '👑' },
-          { id: 2, name: 'Петр', value: 18, avatar: '🥈' },
-          { id: 3, name: 'Ольга', value: 15, avatar: '🥉' },
-          { id: 4, name: 'Сергей', value: 12, avatar: '👤' },
-          { id: 5, name: 'Наталья', value: 10, avatar: '👤' }
-        ],
-        contests: [
-          { id: 1, name: 'Владимир', value: 45, avatar: '👑' },
-          { id: 2, name: 'Татьяна', value: 38, avatar: '🥈' },
-          { id: 3, name: 'Андрей', value: 32, avatar: '🥉' },
-          { id: 4, name: 'Юлия', value: 28, avatar: '👤' },
-          { id: 5, name: 'Максим', value: 25, avatar: '👤' }
-        ]
-      }
-
-      setTimeout(() => {
-        setLeaders(mockData[type] || [])
-        setLoading(false)
-      }, 300)
+      // Получаем данные с API
+      const apiLeaders = await fetchLeaderboard(type)
+      
+      // Форматируем для отображения
+      const formatted = apiLeaders.map((leader, index) => ({
+        id: leader.userId,
+        name: leader.fullName || leader.username || `User ${leader.userId}`,
+        value: leader.score,
+        avatar: index === 0 ? '👑' : index === 1 ? '🥈' : index === 2 ? '🥉' : '👤'
+      }))
+      
+      setLeaders(formatted)
     } catch (error) {
       console.error('Ошибка загрузки топа:', error)
+      setError('Не удалось загрузить топ')
+      setLeaders([])
+    } finally {
       setLoading(false)
     }
   }
@@ -68,6 +56,45 @@ function LeaderboardPage({ tg }) {
       <div className="leaderboard-page">
         <Placeholder description="Загрузка топа...">
           <span style={{ fontSize: '48px' }}>🏆</span>
+        </Placeholder>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="leaderboard-page">
+        <Placeholder description={error}>
+          <span style={{ fontSize: '48px' }}>⚠️</span>
+        </Placeholder>
+      </div>
+    )
+  }
+
+  if (leaders.length === 0) {
+    return (
+      <div className="leaderboard-page">
+        <div className="leaderboard-header">
+          <h1>🏆 Топ игроков</h1>
+          <p>Лучшие участники сообщества</p>
+        </div>
+
+        <div className="leaderboard-tabs">
+          <SegmentedControl>
+            {tabs.map(tab => (
+              <SegmentedControl.Item
+                key={tab.id}
+                selected={activeTab === tab.id}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </SegmentedControl.Item>
+            ))}
+          </SegmentedControl>
+        </div>
+
+        <Placeholder description="Пока нет данных">
+          <span style={{ fontSize: '48px' }}>📊</span>
         </Placeholder>
       </div>
     )
