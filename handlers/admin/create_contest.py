@@ -645,13 +645,13 @@ async def process_timer_custom(message: Message, state: FSMContext):
     
     try:
         timer = int(message.text)
-        if timer < 5 or timer > 300:
-            await message.answer("⚠️ Длительность должна быть от 5 до 300 минут. Попробуйте снова:")
+        if timer < 5 or timer > 3000:
+            await message.answer("⚠️ Длительность должна быть от 5 до 3000 минут. Попробуйте снова:")
             return
         
         await finalize_contest(message, state, timer)
     except ValueError:
-        await message.answer("⚠️ Введите число от 5 до 300:")
+        await message.answer("⚠️ Введите число от 5 до 3000:")
 
 
 async def finalize_contest(message: Message, state: FSMContext, timer_minutes: int):
