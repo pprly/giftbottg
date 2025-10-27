@@ -23,8 +23,7 @@ router = Router()
 
 
 async def check_user_subscription(bot: Bot, user_id: int) -> bool:
-#     """Проверка подписки пользователя на канал"""
-#        return True
+    """Проверка подписки пользователя на канал"""
     try:
         member = await bot.get_chat_member(chat_id=config.CHANNEL_ID, user_id=user_id)
         return member.status in ["member", "administrator", "creator"]
@@ -86,8 +85,8 @@ async def show_top_referrals(callback: CallbackQuery):
     """ТОП по рефералам (только подписанные)"""
     user_id = callback.from_user.id
     
-    # Получаем топ-20 (с запасом, т.к. будем фильтровать)
-    top_users = await db.get_top_by_referrals(limit=20)
+    # ✅ ИСПРАВЛЕНО: используем правильную функцию из API
+    top_users = await db.get_leaderboard_by_referrals(limit=20)
     
     if not top_users:
         text = "📊 **ТОП ПО РЕФЕРАЛАМ**\n\n❌ Пока нет данных"
@@ -97,11 +96,12 @@ async def show_top_referrals(callback: CallbackQuery):
         for user in top_users:
             is_subscribed = await check_user_subscription(callback.bot, user['user_id'])
             if is_subscribed:
-                user_name, _ = await get_user_info(callback.bot, user['user_id'])
+                # ✅ ИСПРАВЛЕНО: берём данные из правильных полей
+                display_name = f"@{user['username']}" if user.get('username') else user.get('full_name', f"User {user['user_id']}")
                 filtered_users.append({
                     'user_id': user['user_id'],
-                    'name': user_name,
-                    'points': user['referral_points']
+                    'name': display_name,
+                    'points': user['referral_count']  # ✅ Изменено с referral_points на referral_count
                 })
             
             # Останавливаемся когда набрали 10 подписанных
@@ -173,8 +173,8 @@ async def show_top_wins(callback: CallbackQuery):
     """ТОП по победам (только подписанные)"""
     user_id = callback.from_user.id
     
-    # Получаем топ-20 (с запасом)
-    top_users = await db.get_top_by_wins(limit=20)
+    # ✅ ИСПРАВЛЕНО: используем правильную функцию из API
+    top_users = await db.get_leaderboard_by_wins(limit=20)
     
     if not top_users:
         text = "📊 **ТОП ПО ПОБЕДАМ**\n\n❌ Пока нет данных"
@@ -184,10 +184,10 @@ async def show_top_wins(callback: CallbackQuery):
         for user in top_users:
             is_subscribed = await check_user_subscription(callback.bot, user['user_id'])
             if is_subscribed:
-                user_name, _ = await get_user_info(callback.bot, user['user_id'])
+                display_name = f"@{user['username']}" if user.get('username') else user.get('full_name', f"User {user['user_id']}")
                 filtered_users.append({
                     'user_id': user['user_id'],
-                    'name': user_name,
+                    'name': display_name,
                     'wins': user['total_wins']
                 })
             
@@ -253,8 +253,8 @@ async def show_top_contests(callback: CallbackQuery):
     """ТОП по активности (только подписанные)"""
     user_id = callback.from_user.id
     
-    # Получаем топ-20 (с запасом)
-    top_users = await db.get_top_by_contests(limit=20)
+    # ✅ ИСПРАВЛЕНО: используем правильную функцию из API
+    top_users = await db.get_leaderboard_by_contests(limit=20)
     
     if not top_users:
         text = "📊 **ТОП ПО АКТИВНОСТИ**\n\n❌ Пока нет данных"
@@ -264,10 +264,10 @@ async def show_top_contests(callback: CallbackQuery):
         for user in top_users:
             is_subscribed = await check_user_subscription(callback.bot, user['user_id'])
             if is_subscribed:
-                user_name, _ = await get_user_info(callback.bot, user['user_id'])
+                display_name = f"@{user['username']}" if user.get('username') else user.get('full_name', f"User {user['user_id']}")
                 filtered_users.append({
                     'user_id': user['user_id'],
-                    'name': user_name,
+                    'name': display_name,
                     'contests': user['total_contests']
                 })
             
@@ -326,4 +326,5 @@ async def show_top_contests(callback: CallbackQuery):
         parse_mode="Markdown"
     )
     await callback.answer()
+
     
