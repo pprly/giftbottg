@@ -682,10 +682,10 @@ class DatabasePostgres:
                     r.referrer_id as user_id,
                     (SELECT username FROM participants 
                     WHERE user_id = r.referrer_id 
-                    ORDER BY created_at DESC LIMIT 1) as username,
+                    LIMIT 1) as username,
                     (SELECT full_name FROM participants 
                     WHERE user_id = r.referrer_id 
-                    ORDER BY created_at DESC LIMIT 1) as full_name,
+                    LIMIT 1) as full_name,
                     COUNT(r.referred_id) as referral_count,
                     ROW_NUMBER() OVER (ORDER BY COUNT(r.referred_id) DESC) as rank
                 FROM referrals r
