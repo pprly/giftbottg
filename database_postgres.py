@@ -680,14 +680,17 @@ class DatabasePostgres:
             rows = await conn.fetch('''
                 SELECT 
                     r.referrer_id as user_id,
-                    p.username,
-                    p.full_name,
+                    (SELECT username FROM participants 
+                    WHERE user_id = r.referrer_id 
+                    ORDER BY created_at DESC LIMIT 1) as username,
+                    (SELECT full_name FROM participants 
+                    WHERE user_id = r.referrer_id 
+                    ORDER BY created_at DESC LIMIT 1) as full_name,
                     COUNT(r.referred_id) as referral_count,
                     ROW_NUMBER() OVER (ORDER BY COUNT(r.referred_id) DESC) as rank
                 FROM referrals r
-                LEFT JOIN participants p ON r.referrer_id = p.user_id
                 WHERE r.subscribed = true
-                GROUP BY r.referrer_id, p.username, p.full_name
+                GROUP BY r.referrer_id
                 ORDER BY referral_count DESC
                 LIMIT $1
             ''', limit)
